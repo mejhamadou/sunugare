@@ -1,0 +1,43 @@
+stages:
+  - build
+  - test
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+
+cache:
+  paths:
+    - .m2/repository/
+    - sunugare-frontend/node_modules/
+
+# Backend : compile
+backend-build:
+  stage: build
+  image: maven:3.9-eclipse-temurin-21
+  script:
+    - cd sunugare-backend
+    - mvn clean compile -DskipTests
+  artifacts:
+    paths:
+      - sunugare-backend/target/
+
+# Backend : tests (désactivés pour l'instant)
+backend-test:
+  stage: test
+  image: maven:3.9-eclipse-temurin-21
+  script:
+    - cd sunugare-backend
+    - mvn test
+  allow_failure: true
+
+# Frontend : build
+frontend-build:
+  stage: build
+  image: node:20-alpine
+  script:
+    - cd sunugare-frontend
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - sunugare-frontend/dist/

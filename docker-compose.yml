@@ -1,0 +1,41 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sunugare-postgres
+    environment:
+      POSTGRES_DB: sunugare
+      POSTGRES_USER: sunugare
+      POSTGRES_PASSWORD: sunugare_dev_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sunugare"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./sunugare-backend
+    container_name: sunugare-backend
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/sunugare
+      SPRING_DATASOURCE_USERNAME: sunugare
+      SPRING_DATASOURCE_PASSWORD: sunugare_dev_password
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build: ./sunugare-frontend
+    container_name: sunugare-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
