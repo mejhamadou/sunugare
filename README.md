@@ -1,27 +1,40 @@
-# SUNUGARE — Système intelligent de gestion automatisée des gares
+# 🚌 SUNUGARE - Système Intelligent de Gestion Automatisée des Gares Routières
 
 **Éditeur** : Jokko Technologies
-**Version** : 1.0.0 (développement)
+**Version** : 1.0.0 (V1 validée)
+**Statut** : Développement terminé pour la V1
 
-## Prérequis
+## 📋 Description
+SUNUGARE est une plateforme web et mobile conçue pour moderniser la gestion des gares routières au Sénégal. Elle permet la gestion des référentiels (gares, compagnies, véhicules), la planification des voyages, la billetterie avec génération de QR Codes, et le contrôle à l'embarquement.
 
-- Java 21
-- Maven 3.9+
-- Node.js 20+ (ou supérieur)
-- Docker & Docker Compose
+## 🛠️ Stack Technique
+- **Backend** : Java 21, Spring Boot 3.x, Spring Security (JWT), Spring Data JPA, Flyway
+- **Base de données** : PostgreSQL 16
+- **Frontend** : React (Vite), TypeScript, CSS pur
+- **Génération PDF & QR Code** : OpenPDF, Google ZXing
+- **Mobile** : PWA (Progressive Web App) avec scan caméra via `html5-qrcode`
+- **Déploiement** : Docker, Docker Compose
+- **CI/CD** : GitHub Actions
 
-## Démarrage rapide (Docker)
+## 🚀 Installation et Lancement (Docker)
 
-```bash
+C'est la méthode la plus simple pour tester l'application.
+
+1. Clonez le dépôt :
+   ```bash
+   git clone https://github.com/ton-username/sunugare.git
+   cd sunugare
+Lancez l'environnement complet :
+
+bash
 docker compose up --build -d
+Accédez à l'application :
 
-Frontend : http://localhost
+Frontend : http://localhost (ou le port défini sur votre machine)
 
-Backend : http://localhost:8082/api/health
+Backend API : http://localhost:8082/api/health
 
-PostgreSQL : localhost:5433 (user: sunugare, password: sunugare_dev_password)
-
-Démarrage en développement (sans Docker pour le code)
+💻 Lancement en mode Développement
 Backend
 bash
 cd sunugare-backend
@@ -31,21 +44,21 @@ bash
 cd sunugare-frontend
 npm install
 npm run dev
-Frontend : http://localhost:3000 (ou 3020 si le port est occupé)
+(Note : Pour tester la caméra sur mobile, le frontend doit être servi en HTTPS, par exemple via Ngrok ou un certificat local).
 
-Backend : http://localhost:8082
+🔐 Comptes par défaut (Base de données fraîche)
+Email : admin@sigar.local (ou créez-en un via /api/auth/register)
 
-Structure
+Mot de passe : password (ou celui défini lors de l'inscription)
+
+📂 Structure du projet
 text
-.
-├── docker-compose.yml          # Environnement complet
-├── sunugare-backend/           # API Spring Boot
-│   ├── Dockerfile
-│   └── src/
-├── sunugare-frontend/          # Interface React
-│   ├── Dockerfile
-│   ├── nginx.conf
-│   └── src/
-└── .gitlab-ci.yml              # Pipeline CI
-Contact
-Chef de projet : [Mejhamadou Tidiane SAMB]
+sunugare/
+├── sunugare-backend/       # API Spring Boot
+├── sunugare-frontend/      # Application React
+├── docker-compose.yml      # Orchestration des conteneurs
+└── .github/workflows/      # Pipeline CI
+👨‍💻 Auteur
+Développeur : [Mejhamadou Tidiane SAMB]
+
+Contact : [mejsamb@gmail.com]
