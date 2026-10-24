@@ -1,57 +1,64 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 
 export default function Dashboard() {
-    const [message, setMessage] = useState('');
-    const [error, setError] = useState('');
-    const navigate = useNavigate();
-
-    const email = localStorage.getItem('email');
-    const token = localStorage.getItem('token');
+    const [stats, setStats] = useState<any>(null);
 
     useEffect(() => {
-        // Si pas de token, on dégage l'utilisateur vers le login
-        if (!token) {
-            navigate('/login');
-            return;
-        }
+        api.getDashboardStats()
+            .then(data => setStats(data))
+            .catch(console.error);
+    }, []);
 
-        // On appelle la route protégée
-        api.getProtectedData(token)
-            .then((data) => setMessage(data.message))
-            .catch((err) => {
-                setError(err.message);
-                // Si le token est expiré, on le supprime et on redirige
-                if (err.message.includes('token')) {
-                    localStorage.removeItem('token');
-                    navigate('/login');
-                }
-            });
-    }, [token, navigate]);
-
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('email');
-        navigate('/login');
-    };
+    if (!stats) return <p>Chargement des statistiques...</p>;
 
     return (
-        <div style={{ maxWidth: '600px', margin: '50px auto', fontFamily: 'sans-serif' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h2>Tableau de bord</h2>
-                <button onClick={handleLogout} style={{ padding: '8px', backgroundColor: '#dc3545', color: 'white', border: 'none', cursor: 'pointer' }}>
-                    Déconnexion
-                </button>
+        <div>
+            <h1 style={{ marginBottom: '30px' }}>Tableau de bord</h1>
+
+            {/* GRILLE DE CARTES KPI */}
+            <div className="grid-cards" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+
+                {/* CARTE 1 : RECETTES */}
+                <div className="card" style={{ borderLeft: '4px solid #10B981' }}>
+                    <h3 style={{ color: 'var(--text-muted)', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        Recettes Totales
+                    </h3>
+                    <p style={{ fontSize: '36px', fontWeight: 'bold', color: 'var(--text-main)', marginTop: '10px' }}>
+                        {stats.recettes.toLocaleString('fr-FR')} <span style={{ fontSize: '18px', color: 'var(--text-muted)' }}>FCFA</span>
+                    </p>
+                </div>
+
+                {/* CARTE 2 : BILLETS VENDUS */}
+                <div className="card" style={{ borderLeft: '4px solid #3B82F6' }}>
+                    <h3 style={{ color: 'var(--text-muted)', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        Billets Vendus
+                    </h3>
+                    <p style={{ fontSize: '36px', fontWeight: 'bold', color: 'var(--text-main)', marginTop: '10px' }}>
+                        {stats.totalBillets}
+                    </p>
+                </div>
+
+                {/* CARTE 3 : VOYAGES A VENIR */}
+                <div className="card" style={{ borderLeft: '4px solid #F59E0B' }}>
+                    <h3 style={{ color: 'var(--text-muted)', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        Voyages Planifiés
+                    </h3>
+                    <p style={{ fontSize: '36px', fontWeight: 'bold', color: 'var(--text-main)', marginTop: '10px' }}>
+                        {stats.voyagesPlanifies}
+                    </p>
+                </div>
+
             </div>
 
-            <p>Bienvenue, <strong>{email}</strong> !</p>
-
-            <div style={{ padding: '20px', backgroundColor: '#f8f9fa', borderLeft: '4px solid #28a745', marginTop: '20px' }}>
-                <h3>Test de l'API sécurisée :</h3>
-                {error && <p style={{ color: 'red' }}>Erreur : {error}</p>}
-                {message && <p style={{ color: 'green' }}>✅ {message}</p>}
-                {!message && !error && <p>Chargement...</p>}
+            {/* SECTION D'INFORMATION */}
+            <div className="card" style={{ marginTop: '30px' }}>
+                <h3>Bienvenue sur votre espace de supervision</h3>
+                <p style={{ color: 'var(--text-muted)', marginTop: '10px', lineHeight: '1.6' }}>
+                    Utilisez le menu de gauche pour naviguer entre les différents modules.
+                    Vous pouvez planifier de nouveaux voyages, gérer votre flotte, et vendre des billets
+                    pour les passagers.
+                </p>
             </div>
         </div>
     );

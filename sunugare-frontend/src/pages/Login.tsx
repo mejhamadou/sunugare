@@ -13,42 +13,61 @@ export default function Login() {
         setError('');
         try {
             const data = await api.login(email, password);
-            // On sauvegarde le token dans le navigateur
             localStorage.setItem('token', data.token);
             localStorage.setItem('email', data.email);
-            // On redirige vers le dashboard
             navigate('/dashboard');
         } catch (err) {
-            setError('Email ou mot de passe incorrect.');
+            setError('Adresse e-mail ou mot de passe incorrect.');
         }
     };
 
     return (
-        <div style={{ maxWidth: '400px', margin: '50px auto', fontFamily: 'sans-serif' }}>
-            <h2>Connexion à SUNUGARE</h2>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+        <div style={{ display: 'flex', height: '100vh' }}>
+            {/* PARTIE GAUCHE : FORMULAIRE */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 10%' }}>
 
-            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    style={{ padding: '10px' }}
-                />
-                <input
-                    type="password"
-                    placeholder="Mot de passe"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    style={{ padding: '10px' }}
-                />
-                <button type="submit" style={{ padding: '10px', backgroundColor: '#007bff', color: 'white', border: 'none', cursor: 'pointer' }}>
-                    Se connecter
-                </button>
-            </form>
+                <div style={{ marginBottom: '40px' }}>
+                    <img src="/logo.png" alt="SUNUGARE" style={{ height: '60px' }} />
+                </div>
+
+                <h1 style={{ fontSize: '32px', marginBottom: '10px', color: 'var(--text-main)' }}>Connexion</h1>
+                <p style={{ color: 'var(--text-muted)', marginBottom: '30px' }}>Accédez à votre espace SUNUGARE pour gérer vos gares.</p>
+
+                {error && <div style={{ backgroundColor: '#FEE2E2', color: '#B91C1C', padding: '10px', borderRadius: '8px', marginBottom: '20px', fontSize: '14px' }}>{error}</div>}
+
+                <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column' }}>
+                    <label style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>Adresse e-mail *</label>
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+
+                    <label style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>Mot de passe *</label>
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+
+                    <button type="submit" style={{ marginTop: '20px', padding: '14px', fontSize: '16px' }}>
+                        Se connecter
+                    </button>
+                </form>
+            </div>
+
+            {/* PARTIE DROITE : IMAGE DE FOND VERTE AVEC LOGO */}
+            <div style={{
+                flex: 1,
+                backgroundColor: '#0F3B2E', // Vert foncé (inspiré de ton logo)
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '40px'
+            }}>
+                {/* Un grand carré blanc pour la visibilité du logo */}
+                <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: '20px', marginBottom: '40px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
+                    <img src="/logo.png" alt="SUNUGARE" style={{ width: '300px', objectFit: 'contain' }} />
+                </div>
+
+                <h2 style={{ color: 'white', fontSize: '28px', marginBottom: '10px' }}>Bienvenue sur SUNUGARE</h2>
+                <p style={{ color: '#A7F3D0', fontSize: '16px', textAlign: 'center' }}>
+                    Moderniser aujourd'hui, connecter demain.
+                </p>
+            </div>
         </div>
     );
 }
