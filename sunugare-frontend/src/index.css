@@ -149,3 +149,46 @@ li {
   margin-bottom: 10px;
   font-size: 14px;
 }
+
+/* --- RESPONSIVE MOBILE --- */
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column; /* Le menu passe au-dessus du contenu */
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    width: 100%; /* Le menu prend toute la largeur */
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 15px;
+  }
+
+  .sidebar-nav {
+    flex-direction: row; /* Les liens s'affichent horizontalement */
+    overflow-x: auto; /* Permet de faire défiler les liens si trop nombreux */
+    padding-bottom: 10px;
+  }
+
+  .nav-item {
+    white-space: nowrap; /* Empêche le texte de passer à la ligne */
+  }
+
+  .main-content {
+    width: 100%;
+  }
+
+  .topbar {
+    padding: 0 15px;
+  }
+
+  .page-content {
+    padding: 15px;
+  }
+
+  /* On passe les grilles de 3 colonnes à 1 colonne sur mobile */
+  .grid-cards {
+    grid-template-columns: 1fr !important;
+  }
+}

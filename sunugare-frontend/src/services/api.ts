@@ -221,4 +221,27 @@ export const api = {
         }
         return response.json();
     },
+
+    payerBillet: async (billetId: number, methode: string) => {
+        const response = await fetch(`${API_URL}/paiements`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getToken()}`
+            },
+            body: JSON.stringify({ billetId, methode }),
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Erreur de paiement');
+        }
+        return response.json();
+    },
+    getPrediction: async () => {
+        const response = await fetch(`${API_URL}/predictions/affluence`, {
+            headers: { 'Authorization': `Bearer ${getToken()}` },
+        });
+        if (!response.ok) throw new Error('Erreur prédiction');
+        return response.json();
+    }
 };

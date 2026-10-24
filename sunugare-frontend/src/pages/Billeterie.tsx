@@ -10,7 +10,8 @@ export default function Billetterie() {
         voyageId: '',
         nomPassager: '',
         telephonePassager: '',
-        numeroSiege: ''
+        numeroSiege: '',
+        methodePaiement: 'Especes'
     });
 
     const [error, setError] = useState('');
@@ -38,6 +39,7 @@ export default function Billetterie() {
         setSuccess('');
 
         try {
+            // 1. On crée le billet
             const nouveauBillet = await api.createBillet({
                 voyageId: Number(formData.voyageId),
                 nomPassager: formData.nomPassager,
@@ -45,8 +47,11 @@ export default function Billetterie() {
                 numeroSiege: Number(formData.numeroSiege)
             });
 
-            setSuccess(`Billet vendu avec succès ! Code : ${nouveauBillet.numeroBillet}`);
-            setFormData({ voyageId: '', nomPassager: '', telephonePassager: '', numeroSiege: '' });
+            // 2. On enregistre le paiement
+            await api.payerBillet(nouveauBillet.id, formData.methodePaiement);
+
+            setSuccess(`Billet vendu et payé par ${formData.methodePaiement} ! Code : ${nouveauBillet.numeroBillet}`);
+            setFormData({ voyageId: '', nomPassager: '', telephonePassager: '', numeroSiege: '', methodePaiement: 'ESPECES' });
             loadData();
         } catch (err: any) {
             setError(err.message);
@@ -96,6 +101,12 @@ export default function Billetterie() {
                         <input type="text" value={formData.telephonePassager} onChange={(e) => setFormData({...formData, telephonePassager: e.target.value})} />
                         <label>Numéro de siège</label>
                         <input type="number" value={formData.numeroSiege} onChange={(e) => setFormData({...formData, numeroSiege: e.target.value})} required />
+                        <label>Mode de paiement</label>
+                        <select value={formData.methodePaiement} onChange={(e) => setFormData({...formData, methodePaiement: e.target.value})} required>
+                            <option value="ESPECES">Espèces</option>
+                            <option value="WAVE">Wave</option>
+                            <option value="ORANGE_MONEY">Orange Money</option>
+                        </select>
                         <button type="submit" style={{ marginTop: '15px' }}>Encaisser & Générer Billet</button>
                     </form>
                 </div>
@@ -120,6 +131,26 @@ export default function Billetterie() {
                                     >
                                         Voir QR Code
                                     </button>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px' }}>
+                                    <div style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--primary)' }}>{b.numeroBillet}</div>
+
+                                    <div style={{ display: 'flex', gap: '5px' }}>
+                                        <button
+                                            onClick={() => setQrModal({ id: b.id, nom: b.nomPassager })}
+                                            style={{ padding: '4px 10px', fontSize: '11px', backgroundColor: '#10B981' }}
+                                        >
+                                            QR Code
+                                        </button>
+                                        <a
+                                            href={`http://localhost:8082/api/billets/${b.id}/pdf`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            style={{ padding: '4px 10px', fontSize: '11px', backgroundColor: '#3B82F6', color: 'white', textDecoration: 'none', borderRadius: '4px' }}
+                                        >
+                                            Imprimer PDF
+                                        </a>
+                                    </div>
                                 </div>
                             </li>
                         ))}
