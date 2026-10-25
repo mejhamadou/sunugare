@@ -15,7 +15,7 @@ export const api = {
         return response.json();
     },
 
-    getProtectedData: async (token: string) => {
+    getProtectedData: async () => {
         const response = await fetch(`${API_URL}/test/protected`, {
             headers: { 'Authorization': `Bearer ${getToken()}` },
         });
@@ -93,7 +93,7 @@ export const api = {
         if (!response.ok) throw new Error('Erreur vehicules');
         return response.json();
     },
-    createVehicule: async (data: { immatriculation: string, marque: string, capacite: number, compagnieId: number, dateExpirationAssurance: any, dateExpirationCarteGrise: any  }) => {
+    createVehicule: async (data: { immatriculation: string, marque?: string | null, capacite: number, compagnieId: number, dateExpirationAssurance?: string | null, dateExpirationCarteGrise?: string | null }) => {
         const response = await fetch(`${API_URL}/vehicules`, {
             method: 'POST',
             headers: {

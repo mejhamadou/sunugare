@@ -17,8 +17,8 @@ export default function Infrastructures() {
     const [newQuai, setNewQuai] = useState({ numero: '', terminalId: '' });
 
     const [editingLigneId, setEditingLigneId] = useState<number | null>(null);
-    const [editingTerminalId, setEditingTerminalId] = useState<number | null>(null);
-    const [editingQuaiId, setEditingQuaiId] = useState<number | null>(null);
+    // const [editingTerminalId, setEditingTerminalId] = useState<number | null>(null);
+    // const [editingQuaiId, setEditingQuaiId] = useState<number | null>(null);
 
 
     const loadData = async () => {

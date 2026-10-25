@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import { api } from '../services/api';
 
@@ -44,7 +44,7 @@ export default function Controle() {
                     validerBillet(decodedText);
                     scanner.clear(); // On arrête la caméra
                 },
-                (error) => {
+                (_error) => {
                     // On ignore les erreurs de scan en continu pour ne pas spammer la console
                 }
             );
