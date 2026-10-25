@@ -3,6 +3,8 @@ package sn.jokko.sunugare.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.time.LocalDate;
+
 public class ChauffeurRequest {
     @NotBlank(message = "Le prenom est obligatoire")
     private String prenom;
@@ -18,6 +20,9 @@ public class ChauffeurRequest {
     @NotNull(message = "L'ID de la compagnie est obligatoire")
     private Long compagnieId;
 
+    private java.time.LocalDate dateExpirationPermis;
+    private Boolean conformiteValideeManuellement = false;
+
     // Getters et Setters...
     public String getPrenom() { return prenom; }
     public void setPrenom(String prenom) { this.prenom = prenom; }
@@ -29,4 +34,6 @@ public class ChauffeurRequest {
     public void setNumeroPermis(String numeroPermis) { this.numeroPermis = numeroPermis; }
     public Long getCompagnieId() { return compagnieId; }
     public void setCompagnieId(Long compagnieId) { this.compagnieId = compagnieId; }
+    public LocalDate getDateExpirationPermis() {return dateExpirationPermis;}
+    public void setDateExpirationPermis(LocalDate dateExpirationPermis) {this.dateExpirationPermis = dateExpirationPermis;}
 }

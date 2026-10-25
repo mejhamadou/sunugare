@@ -18,18 +18,32 @@ public class VoyageController {
         this.service = service;
     }
 
+    @GetMapping("/public/disponibles")
+    public ResponseEntity<List<Voyage>> getVoyagesPublics() {
+        return ResponseEntity.ok(service.getVoyagesPourPublic());
+    }
+
     @PostMapping
     public ResponseEntity<Voyage> creer(@Valid @RequestBody VoyageRequest request) {
         return ResponseEntity.ok(service.creerVoyage(request));
     }
 
     @GetMapping
-    public ResponseEntity<List<Voyage>> getAll() {
-        return ResponseEntity.ok(service.getAll());
+    public ResponseEntity<List<Voyage>> getAll(java.security.Principal principal) {
+        // principal.getName() renvoie l'email de l'utilisateur connecté
+        return ResponseEntity.ok(service.getAllVoyagesPourUtilisateur(principal.getName()));
     }
 
     @PatchMapping("/{id}/statut")
     public ResponseEntity<Voyage> changerStatut(@PathVariable Long id, @RequestParam String statut) {
         return ResponseEntity.ok(service.changerStatut(id, statut));
     }
+
+    @PatchMapping("/{id}/retard")
+    public ResponseEntity<Voyage> signalerRetard(@PathVariable Long id, @RequestParam Integer minutes) {
+        return ResponseEntity.ok(service.signalerRetard(id, minutes));
+    }
+
+
+
 }

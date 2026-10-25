@@ -14,7 +14,6 @@ public class LigneService {
     private final LigneRepository ligneRepository;
     private final VilleRepository villeRepository;
 
-    // ✅ C'est ici qu'il faut ajouter VilleRepository
     public LigneService(LigneRepository ligneRepository, VilleRepository villeRepository) {
         this.ligneRepository = ligneRepository;
         this.villeRepository = villeRepository;
@@ -35,6 +34,19 @@ public class LigneService {
         ligne.setVilleArrivee(arrivee);
         ligne.setDistanceKm(request.getDistanceKm());
 
+        return ligneRepository.save(ligne);
+    }
+
+    public Ligne updateLigne(Long id, LigneRequest request) {
+        Ligne ligne = ligneRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ligne introuvable"));
+
+        Ville depart = villeRepository.findById(request.getVilleDepartId()).orElseThrow();
+        Ville arrivee = villeRepository.findById(request.getVilleArriveeId()).orElseThrow();
+
+        ligne.setVilleDepart(depart);
+        ligne.setVilleArrivee(arrivee);
+        ligne.setDistanceKm(request.getDistanceKm());
         return ligneRepository.save(ligne);
     }
 }

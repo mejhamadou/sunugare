@@ -24,6 +24,9 @@ public class Chauffeur {
     @JoinColumn(name = "compagnie_id", nullable = false)
     private Compagnie compagnie;
 
+    private java.time.LocalDate dateExpirationPermis;
+    private Boolean conformiteValideeManuellement = false;
+
     // Getters et Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -40,4 +43,9 @@ public class Chauffeur {
 
     public Compagnie getCompagnie() { return compagnie; }
     public void setCompagnie(Compagnie compagnie) { this.compagnie = compagnie; }
+    public java.time.LocalDate getDateExpirationPermis() { return dateExpirationPermis; }
+    public void setDateExpirationPermis(java.time.LocalDate dateExpirationPermis) { this.dateExpirationPermis = dateExpirationPermis; }
+
+    public Boolean getConformiteValideeManuellement() { return conformiteValideeManuellement; }
+    public void setConformiteValideeManuellement(Boolean conformiteValideeManuellement) { this.conformiteValideeManuellement = conformiteValideeManuellement; }
 }

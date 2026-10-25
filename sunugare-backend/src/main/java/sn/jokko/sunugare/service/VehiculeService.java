@@ -28,10 +28,38 @@ public class VehiculeService {
         v.setMarque(request.getMarque());
         v.setCapacite(request.getCapacite());
         v.setCompagnie(compagnie);
+        v.setDateExpirationAssurance(request.getDateExpirationAssurance());
+        v.setDateExpirationCarteGrise(request.getDateExpirationCarteGrise());
+
+        return vehiculeRepository.save(v);
+    }
+
+    public Vehicule updateVehicule(Long id, VehiculeRequest request) {
+        Vehicule v = vehiculeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Véhicule introuvable"));
+
+        Compagnie compagnie = compagnieRepository.findById(request.getCompagnieId())
+                .orElseThrow(() -> new RuntimeException("Compagnie introuvable"));
+
+        v.setImmatriculation(request.getImmatriculation());
+        v.setMarque(request.getMarque());
+        v.setCapacite(request.getCapacite());
+        v.setCompagnie(compagnie);
+
+        // ✅ Sauvegarde des dates
+        v.setDateExpirationAssurance(request.getDateExpirationAssurance());
+        v.setDateExpirationCarteGrise(request.getDateExpirationCarteGrise());
+
         return vehiculeRepository.save(v);
     }
 
     public List<Vehicule> getAll() {
         return vehiculeRepository.findAll();
+    }
+
+    public Vehicule validerManuellement(Long id) {
+        Vehicule v = vehiculeRepository.findById(id).orElseThrow();
+        v.setConformiteValideeManuellement(true);
+        return vehiculeRepository.save(v);
     }
 }

@@ -15,6 +15,7 @@ export default function Login() {
             const data = await api.login(email, password);
             localStorage.setItem('token', data.token);
             localStorage.setItem('email', data.email);
+            localStorage.setItem('role', data.role);
             navigate('/dashboard');
         } catch (err) {
             setError('Adresse e-mail ou mot de passe incorrect.');

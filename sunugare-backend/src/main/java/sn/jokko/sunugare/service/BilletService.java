@@ -3,8 +3,11 @@ package sn.jokko.sunugare.service;
 import org.springframework.stereotype.Service;
 import sn.jokko.sunugare.dto.BilletRequest;
 import sn.jokko.sunugare.entity.Billet;
+import sn.jokko.sunugare.entity.User;
 import sn.jokko.sunugare.entity.Voyage;
 import sn.jokko.sunugare.repository.BilletRepository;
+import sn.jokko.sunugare.repository.PaiementRepository;
+import sn.jokko.sunugare.repository.UserRepository;
 import sn.jokko.sunugare.repository.VoyageRepository;
 
 import java.util.List;
@@ -14,10 +17,14 @@ import java.util.UUID;
 public class BilletService {
     private final BilletRepository billetRepository;
     private final VoyageRepository voyageRepository;
+    private final UserRepository userRepository;
+    private final PaiementRepository paiementRepository;
 
-    public BilletService(BilletRepository billetRepository, VoyageRepository voyageRepository) {
+    public BilletService(BilletRepository billetRepository, VoyageRepository voyageRepository, UserRepository userRepository, PaiementRepository paiementRepository) {
         this.billetRepository = billetRepository;
         this.voyageRepository = voyageRepository;
+        this.userRepository = userRepository;
+        this.paiementRepository = paiementRepository;
     }
 
     public Billet vendreBillet(BilletRequest request) {
@@ -60,5 +67,45 @@ public class BilletService {
 
         billet.setStatut("UTILISE");
         return billetRepository.save(billet);
+    }
+
+    public List<Billet> getBilletsPourUtilisateur(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow();
+        boolean isAdmin = user.getRoles().stream().anyMatch(r -> r.getName().equals("ROLE_ADMIN"));
+
+        if (isAdmin) {
+            return billetRepository.findAll();
+        }
+        if (user.getGare() != null) {
+            return billetRepository.findAllByGareId(user.getGare().getId());
+        }
+        return List.of();
+    }
+
+   public Billet annulerBillet(Long billetId) {
+        Billet billet = billetRepository.findById(billetId)
+                .orElseThrow(() -> new RuntimeException("Billet introuvable"));
+
+        if (billet.getStatut().equals("ANNULE")) {
+            throw new RuntimeException("Ce billet est déjà annulé.");
+        }
+        if (billet.getStatut().equals("UTILISE")) {
+            throw new RuntimeException("Impossible d'annuler un billet déjà utilisé.");
+        }
+
+        // 1. On change le statut du billet
+        billet.setStatut("ANNULE");
+        billetRepository.save(billet);
+
+        // 2. On cherche le paiement associé pour le rembourser
+        paiementRepository.findAll().stream()
+                .filter(p -> p.getBillet().getId().equals(billetId))
+                .findFirst()
+                .ifPresent(paiement -> {
+                    paiement.setStatut("REMBOURSE");
+                    paiementRepository.save(paiement);
+                });
+
+        return billet;
     }
 }

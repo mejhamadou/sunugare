@@ -93,7 +93,7 @@ export const api = {
         if (!response.ok) throw new Error('Erreur vehicules');
         return response.json();
     },
-    createVehicule: async (data: { immatriculation: string, marque: string, capacite: number, compagnieId: number }) => {
+    createVehicule: async (data: { immatriculation: string, marque: string, capacite: number, compagnieId: number, dateExpirationAssurance: any, dateExpirationCarteGrise: any  }) => {
         const response = await fetch(`${API_URL}/vehicules`, {
             method: 'POST',
             headers: {
@@ -105,6 +105,20 @@ export const api = {
         if (!response.ok) throw new Error('Erreur création véhicule');
         return response.json();
     },
+
+    updateVehicule: async (id: number, data: any) => {
+        const response = await fetch(`${API_URL}/vehicules/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getToken()}`
+            },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error('Erreur modification véhicule');
+        return response.json();
+    },
+
 
     // --- CHAUFFEURS ---
     getChauffeurs: async () => {
@@ -124,6 +138,16 @@ export const api = {
             body: JSON.stringify(data),
         });
         if (!response.ok) throw new Error('Erreur création chauffeur');
+        return response.json();
+    },
+
+    updateChauffeur: async (id: number, data: any) => {
+        const response = await fetch(`${API_URL}/chauffeurs/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error('Erreur modification chauffeur');
         return response.json();
     },
 
@@ -243,5 +267,162 @@ export const api = {
         });
         if (!response.ok) throw new Error('Erreur prédiction');
         return response.json();
-    }
+    },
+
+    // --- UTILISATEURS ---
+    getUsers: async () => {
+        const response = await fetch(`${API_URL}/users`, {
+            headers: { 'Authorization': `Bearer ${getToken()}` },
+        });
+        if (!response.ok) throw new Error('Erreur utilisateurs');
+        return response.json();
+    },
+    createUser: async (data: { firstName: string, lastName: string, email: string, password: string, roleName: string }) => {
+        const response = await fetch(`${API_URL}/users`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getToken()}`
+            },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Erreur création utilisateur');
+        }
+        return response.json();
+    },
+    toggleUserStatus: async (id: number) => {
+        const response = await fetch(`${API_URL}/users/${id}/toggle-status`, {
+            method: 'PATCH',
+            headers: { 'Authorization': `Bearer ${getToken()}` },
+        });
+        if (!response.ok) throw new Error('Erreur changement de statut');
+        return response.json();
+    },
+
+    updateUser: async (id: number, data: { firstName: string, lastName: string, email: string, password?: string, roleName: string }) => {
+        const response = await fetch(`${API_URL}/users/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getToken()}`
+            },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Erreur modification utilisateur');
+        }
+        return response.json();
+    },
+
+    // --- TERMINAUX ---
+    getTerminaux: async () => {
+        const response = await fetch(`${API_URL}/terminaux`, { headers: { 'Authorization': `Bearer ${getToken()}` } });
+        return response.ok ? response.json() : [];
+    },
+    createTerminal: async (data: { nom: string, gareId: number }) => {
+        const response = await fetch(`${API_URL}/terminaux`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error('Erreur création terminal');
+        return response.json();
+    },
+
+    // --- QUAIS ---
+    createQuai: async (data: { numero: string, terminalId: number }) => {
+        const response = await fetch(`${API_URL}/quais`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error('Erreur création quai');
+        return response.json();
+    },
+
+    // --- LIGNES ---
+    createLigne: async (data: { villeDepartId: number, villeArriveeId: number, distanceKm: number }) => {
+        const response = await fetch(`${API_URL}/lignes`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error('Erreur création ligne');
+        return response.json();
+    },
+
+    // --- RETARDS---
+    signalerRetard: async (id: number, minutes: number) => {
+        const response = await fetch(`${API_URL}/voyages/${id}/retard?minutes=${minutes}`, {
+            method: 'PATCH',
+            headers: { 'Authorization': `Bearer ${getToken()}` },
+        });
+        if (!response.ok) throw new Error('Erreur signalement retard');
+        return response.json();
+    },
+
+    updateLigne: async (id: number, data: { villeDepartId: number, villeArriveeId: number, distanceKm: number }) => {
+        const response = await fetch(`${API_URL}/lignes/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error('Erreur modification ligne');
+        return response.json();
+    },
+
+    updateTerminal: async (id: number, data: { nom: string, gareId: number }) => {
+        const res = await fetch(`${API_URL}/terminaux/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` }, body: JSON.stringify(data) });
+        if (!res.ok) throw new Error('Erreur'); return res.json();
+    },
+    updateQuai: async (id: number, data: { numero: string, terminalId: number }) => {
+        const res = await fetch(`${API_URL}/quais/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` }, body: JSON.stringify(data) });
+        if (!res.ok) throw new Error('Erreur'); return res.json();
+    },
+
+    ajouterBagage: async (data: { billetId: number, description: string, poidsKg?: number, tarif?: number }) => {
+        const response = await fetch(`${API_URL}/bagages`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error('Erreur ajout bagage');
+        return response.json();
+    },
+
+    annulerBillet: async (id: number) => {
+        const response = await fetch(`${API_URL}/billets/${id}/annuler`, {
+            method: 'PATCH',
+            headers: { 'Authorization': `Bearer ${getToken()}` },
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Erreur annulation');
+        }
+        return response.json();
+    },
+
+    // --- ABONNEMENTS ---
+    getAbonnements: async () => {
+        const response = await fetch(`${API_URL}/abonnements`, {
+            headers: { 'Authorization': `Bearer ${getToken()}` },
+        });
+        if (!response.ok) throw new Error('Erreur abonnements');
+        return response.json();
+    },
+    createAbonnement: async (data: { nomPassager: string, telephone: string, ligneId: number, dateDebut: string, dateFin: string }) => {
+        const response = await fetch(`${API_URL}/abonnements`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error || 'Erreur création abonnement');
+        }
+        return response.json();
+    },
 };

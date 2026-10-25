@@ -2,6 +2,7 @@ package sn.jokko.sunugare.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -33,11 +34,25 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        // Routes publiques
                         .requestMatchers("/api/auth/**", "/api/health", "/actuator/**", "/api/billets/*/qrcode", "/api/billets/*/pdf").permitAll()
+
+                        // ✅ Routes publiques pour la réservation en ligne
+                        .requestMatchers(HttpMethod.GET, "/api/voyages/public/**", "/api/gares/public/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/billets/public/reserver").permitAll()
+
+                        // Routes accessibles à tous les utilisateurs connectés
+                        .requestMatchers(HttpMethod.GET, "/api/voyages/**", "/api/billets/**", "/api/gares/**", "/api/planning/**", "/api/bagages/**", "/api/abonnements/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_AGENT", "ROLE_RESPONSABLE")
+                        .requestMatchers(HttpMethod.POST, "/api/billets", "/api/billets/valider").hasAnyAuthority("ROLE_ADMIN", "ROLE_AGENT", "ROLE_RESPONSABLE")
+
+                        // ✅ Routes réservées aux Admins et Responsables (Création de voyages, gares, véhicules, utilisateurs...)
+                        .requestMatchers("/api/voyages/**", "/api/utilisateurs/**", "/api/vehicules/**", "/api/chauffeurs/**", "/api/terminaux/**", "/api/quais/**", "/api/lignes/**", "/api/abonnements/**" ).hasAnyAuthority("ROLE_ADMIN", "ROLE_RESPONSABLE")
+
+                        // Tout le reste nécessite au moins d'être connecté
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authenticationProvider(authenticationProvider()) // On ajoute le provider ici
+                .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

@@ -33,6 +33,25 @@ public class ChauffeurService {
         return chauffeurRepository.save(v);
     }
 
+    public Chauffeur updateChauffeur(Long id, ChauffeurRequest request) {
+        Chauffeur chauffeur = chauffeurRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Chauffeur introuvable"));
+
+        Compagnie compagnie = compagnieRepository.findById(request.getCompagnieId())
+                .orElseThrow(() -> new RuntimeException("Compagnie introuvable"));
+
+        chauffeur.setPrenom(request.getPrenom());
+        chauffeur.setNom(request.getNom());
+        chauffeur.setTelephone(request.getTelephone());
+        chauffeur.setNumeroPermis(request.getNumeroPermis());
+        chauffeur.setCompagnie(compagnie);
+
+        // ✅ On enregistre la date d'expiration du permis
+        chauffeur.setDateExpirationPermis(request.getDateExpirationPermis());
+
+        return chauffeurRepository.save(chauffeur);
+    }
+
     public List<Chauffeur> getAll() {
         return chauffeurRepository.findAll();
     }

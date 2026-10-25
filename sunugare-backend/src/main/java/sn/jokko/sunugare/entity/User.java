@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.springframework.security.core.userdetails.UserDetails;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 
 
@@ -28,6 +29,7 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @JsonIgnore // ✅ Ne jamais renvoyer le mot de passe dans les réponses API
     @Column(nullable = false)
     private String password;
 
@@ -71,6 +73,13 @@ public class User implements UserDetails {
     public boolean isCredentialsNonExpired() {
         return true;
     }
+
+    @ManyToOne
+    @JoinColumn(name = "gare_id")
+    private Gare gare;
+
+    public Gare getGare() { return gare; }
+    public void setGare(Gare gare) { this.gare = gare; }
 
     // Getters et Setters
     public Long getId() { return id; }

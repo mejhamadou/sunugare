@@ -22,6 +22,10 @@ public class VehiculeController {
     public ResponseEntity<Vehicule> creer(@Valid @RequestBody VehiculeRequest request) {
         return ResponseEntity.ok(service.creerVehicule(request));
     }
+    @PutMapping("/{id}")
+    public ResponseEntity<Vehicule> modifier(@PathVariable Long id, @Valid @RequestBody VehiculeRequest request) {
+        return ResponseEntity.ok(service.updateVehicule(id, request));
+    }
 
     @GetMapping
     public ResponseEntity<List<Vehicule>> getAll() {

@@ -30,6 +30,9 @@ public class Voyage {
     @Column(nullable = false)
     private String statut = "PLANIFIE";
 
+    @Column(name = "retard_minutes")
+    private Integer retardMinutes = 0;
+
     // Getters et Setters... (Génère-les avec IntelliJ, il y en a beaucoup !)
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -47,4 +50,6 @@ public class Voyage {
     public void setPrix(Double prix) { this.prix = prix; }
     public String getStatut() { return statut; }
     public void setStatut(String statut) { this.statut = statut; }
+    public Integer getRetardMinutes() { return retardMinutes; }
+    public void setRetardMinutes(Integer retardMinutes) { this.retardMinutes = retardMinutes; }
 }

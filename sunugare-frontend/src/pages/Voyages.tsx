@@ -108,7 +108,7 @@ export default function Voyages() {
 
                         <label>Quai</label>
                         <select value={formData.quaiId} onChange={(e) => setFormData({...formData, quaiId: e.target.value})} required>
-                            <option value="">Choisir un quai</option>
+                            <option value="">Automatique</option>)
                             {quais.map(q => (
                                 <option key={q.id} value={q.id}>{q.numero}</option>
                             ))}

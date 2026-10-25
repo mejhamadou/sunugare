@@ -1,0 +1,2 @@
+ALTER TABLE users ADD COLUMN gare_id BIGINT;
+ALTER TABLE users ADD CONSTRAINT fk_user_gare FOREIGN KEY (gare_id) REFERENCES gares(id);

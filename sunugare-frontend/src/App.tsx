@@ -8,6 +8,11 @@ import Chauffeurs from './pages/Chauffeurs';
 import Voyages from './pages/Voyages';
 import Billeterie from './pages/Billeterie';
 import Controle from './pages/Controle';
+import Utilisateurs from './pages/Utilisateurs';
+import Infrastructures from './pages/Infrastructures';
+import Planning from './pages/Planning';
+import ReservationPublique from './pages/ReservationPublique';
+import Abonnements from './pages/Abonnements';
 
 function App() {
     return (
@@ -15,6 +20,7 @@ function App() {
             <Routes>
                 <Route path="/" element={<Navigate to="/login" replace />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/reserver" element={<ReservationPublique />} />
 
                 {/* Routes protégées enveloppées dans le Layout */}
                 <Route element={<Layout />}>
@@ -25,6 +31,10 @@ function App() {
                     <Route path="/voyages" element={<Voyages />} />
                     <Route path="/billetterie" element={<Billeterie />} />
                     <Route path="/controle" element={<Controle />} />
+                    <Route path="/utilisateurs" element={<Utilisateurs />} />
+                    <Route path="/infrastructures" element={<Infrastructures />} />
+                    <Route path="/planning" element={<Planning />} />
+                    <Route path="/abonnements" element={<Abonnements />} />
                 </Route>
             </Routes>
         </BrowserRouter>

@@ -17,4 +17,7 @@ public interface BilletRepository extends JpaRepository<Billet, Long> {
 
     @Query(value = "SELECT CAST(date_emission AS DATE), COUNT(*) FROM billets GROUP BY CAST(date_emission AS DATE) ORDER BY CAST(date_emission AS DATE) DESC LIMIT 7", nativeQuery = true)
     List<Object[]> countBilletsParJour();
+
+    @Query("SELECT b FROM Billet b WHERE b.voyage.quai.terminal.gare.id = :gareId")
+    List<Billet> findAllByGareId(Long gareId);
 }

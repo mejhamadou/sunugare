@@ -1,0 +1,1 @@
+ALTER TABLE voyages ADD COLUMN retard_minutes INT DEFAULT 0;

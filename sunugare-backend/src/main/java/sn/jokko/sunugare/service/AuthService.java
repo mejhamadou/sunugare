@@ -73,7 +73,8 @@ public class AuthService {
 
         String jwtToken = jwtService.generateToken(user.getEmail());
 
-        // 3. On renvoie le token
-        return new AuthResponse(jwtToken, user.getEmail());
+        // 3. On récupère le premier rôle de l'utilisateur
+        String userRole = user.getRoles().iterator().next().getName();
+        return new AuthResponse(jwtToken, user.getEmail(), userRole);
     }
 }

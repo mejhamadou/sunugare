@@ -91,4 +91,28 @@ public class BilletController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    @PatchMapping("/{id}/annuler")
+    public ResponseEntity<?> annuler(@PathVariable Long id) {
+        try {
+            Billet billet = service.annulerBillet(id);
+            return ResponseEntity.ok(billet);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/public/reserver")
+    public ResponseEntity<?> reserverEnLigne(@Valid @RequestBody BilletRequest request) {
+        try {
+            Billet billet = service.vendreBillet(request);
+            // On change le statut pour dire que c'est une réservation en ligne
+            billet.setStatut("RESERVE_EN_LIGNE");
+            // On sauvegarde (il faudra une méthode save dans le service)
+
+            return ResponseEntity.ok(billet);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 }

@@ -27,4 +27,9 @@ public class LigneController {
     public ResponseEntity<Ligne> creer(@Valid @RequestBody LigneRequest request) {
         return ResponseEntity.ok(service.creerLigne(request));
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Ligne> modifier(@PathVariable Long id, @Valid @RequestBody LigneRequest request) {
+        return ResponseEntity.ok(service.updateLigne(id, request));
+    }
 }

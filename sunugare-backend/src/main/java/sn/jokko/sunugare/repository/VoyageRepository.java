@@ -12,4 +12,8 @@ public interface VoyageRepository extends JpaRepository<Voyage, Long> {
 
     @Query(value = "SELECT CAST(date_depart AS DATE), COUNT(*) FROM voyages GROUP BY CAST(date_depart AS DATE) ORDER BY CAST(date_depart AS DATE) DESC LIMIT 7", nativeQuery = true)
     List<Object[]> countVoyagesParJour();
+
+    // Récupérer les voyages d'une gare spécifique
+    @Query("SELECT v FROM Voyage v WHERE v.quai.terminal.gare.id = :gareId")
+    List<Voyage> findAllByGareId(Long gareId);
 }
