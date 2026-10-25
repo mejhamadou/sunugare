@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { api } from '../services/api';
+
 
 export default function Intelligence() {
     const [quais, setQuais] = useState<any[]>([]);
