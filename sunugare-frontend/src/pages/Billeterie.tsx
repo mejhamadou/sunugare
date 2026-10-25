@@ -20,6 +20,7 @@ export default function Billetterie() {
     // Modales
     const [qrModal, setQrModal] = useState<{ id: number, nom: string } | null>(null);
     const [bagageModal, setBagageModal] = useState<{ id: number, nom: string } | null>(null);
+    const [filtres, setFiltres] = useState({ nom: '', statut: '', dateDebut: '', dateFin: '' });
 
     // Formulaire Bagage
     const [bagageForm, setBagageForm] = useState({ description: '', poidsKg: '', tarif: '0' });
@@ -85,6 +86,48 @@ export default function Billetterie() {
             loadData(); // Recharge la liste
         } catch (err: any) {
             alert(err.message);
+        }
+    };
+
+    const handleRecherche = async () => {
+        try {
+            // On construit l'URL avec les paramètres
+            const params = new URLSearchParams();
+            if (filtres.nom) params.append('nom', filtres.nom);
+            if (filtres.statut) params.append('statut', filtres.statut);
+            if (filtres.dateDebut) params.append('dateDebut', filtres.dateDebut);
+            if (filtres.dateFin) params.append('dateFin', filtres.dateFin);
+
+            const res = await fetch(`/api/billets/recherche-filtres?${params.toString()}`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+
+            const data = await res.json();
+            setBillets(data);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleExportCsv = async () => {
+        try {
+            const response = await fetch('/api/billets/export', {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+
+            if (!response.ok) throw new Error("Erreur d'export");
+
+            // On transforme la réponse en fichier téléchargeable
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'billets_sunugare.csv';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } catch (err) {
+            alert("Impossible de télécharger le fichier CSV");
         }
     };
 
@@ -166,6 +209,32 @@ export default function Billetterie() {
                 {/* LISTE DES BILLETS VENDUS */}
                 <div className="card">
                     <h3>Billets vendus ({billets.length})</h3>
+                    <button onClick={handleExportCsv} style={{ padding: '6px 12px', backgroundColor: '#10B981', color: 'white', border: 'none', borderRadius: '5px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
+                        📥 Exporter en CSV
+                    </button>
+                    {/* ✅ BARRE DE RECHERCHE */}
+                    <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
+                        <input
+                            type="text"
+                            placeholder="Rechercher un passager..."
+                            value={filtres.nom}
+                            onChange={(e) => setFiltres({...filtres, nom: e.target.value})}
+                            style={{ flex: 2, marginBottom: 0, padding: '8px' }}
+                        />
+                        <select
+                            value={filtres.statut}
+                            onChange={(e) => setFiltres({...filtres, statut: e.target.value})}
+                            style={{ flex: 1, marginBottom: 0, padding: '8px' }}
+                        >
+                            <option value="">Tous les statuts</option>
+                            <option value="VALIDE">Valide</option>
+                            <option value="UTILISE">Utilisé</option>
+                            <option value="ANNULE">Annulé</option>
+                        </select>
+                        <button onClick={handleRecherche} style={{ padding: '8px 15px' }}>Filtrer</button>
+                        <button onClick={() => { setFiltres({ nom: '', statut: '', dateDebut: '', dateFin: '' }); loadData(); }} className="btn-danger" style={{ padding: '8px 15px' }}>Reset</button>
+                    </div>
+
                     <ul>
                         {billets.map(b => (
                             <li key={b.id} style={{

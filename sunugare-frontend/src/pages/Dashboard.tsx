@@ -3,23 +3,96 @@ import { api } from '../services/api';
 
 export default function Dashboard() {
     const [stats, setStats] = useState<any>(null);
-    const [prediction, setPrediction] = useState<any>(null); // ✅ Nouvel état
+    const [prediction, setPrediction] = useState<any>(null);
+    const [periode, setPeriode] = useState<'jour' | 'semaine' | 'mois' | 'tout'>('tout');
+
+    const loadStats = async () => {
+        let debut = undefined;
+        let fin = undefined;
+        const aujourdhui = new Date();
+
+        if (periode === 'jour') {
+            debut = aujourdhui.toISOString().split('T')[0];
+            fin = debut;
+        } else if (periode === 'semaine') {
+            const ilYa7Jours = new Date();
+            ilYa7Jours.setDate(aujourdhui.getDate() - 7);
+            debut = ilYa7Jours.toISOString().split('T')[0];
+            fin = aujourdhui.toISOString().split('T')[0];
+        } else if (periode === 'mois') {
+            const ilYa30Jours = new Date();
+            ilYa30Jours.setDate(aujourdhui.getDate() - 30);
+            debut = ilYa30Jours.toISOString().split('T')[0];
+            fin = aujourdhui.toISOString().split('T')[0];
+        }
+
+        const data = await api.getDashboardStats(debut, fin);
+        setStats(data);
+    };
 
     useEffect(() => {
-        // On charge les stats et la prédiction en parallèle
-        Promise.all([api.getDashboardStats(), api.getPrediction()])
-            .then(([statsData, predictionData]) => {
-                setStats(statsData);
-                setPrediction(predictionData);
-            })
-            .catch(console.error);
-    }, []);
+        loadStats();
+        api.getPrediction().then(setPrediction).catch(console.error);
+    }, [periode]);
 
     if (!stats || !prediction) return <p>Chargement des données...</p>;
+
+    const handleExportRapport = async () => {
+        // On calcule les dates selon la période sélectionnée (même logique que loadStats)
+        let debut = '';
+        let fin = '';
+        const aujourdhui = new Date();
+
+        if (periode === 'jour') {
+            debut = aujourdhui.toISOString().split('T')[0];
+            fin = debut;
+        } else if (periode === 'semaine') {
+            const ilYa7Jours = new Date();
+            ilYa7Jours.setDate(aujourdhui.getDate() - 7);
+            debut = ilYa7Jours.toISOString().split('T')[0];
+            fin = aujourdhui.toISOString().split('T')[0];
+        } else if (periode === 'mois') {
+            const ilYa30Jours = new Date();
+            ilYa30Jours.setDate(aujourdhui.getDate() - 30);
+            debut = ilYa30Jours.toISOString().split('T')[0];
+            fin = aujourdhui.toISOString().split('T')[0];
+        }
+
+        try {
+            const response = await fetch(`/api/dashboard/export-csv?dateDebut=${debut}&dateFin=${fin}`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'rapport_sunugare.csv';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } catch (err) {
+            alert("Erreur lors du téléchargement du rapport");
+        }
+    };
 
     return (
         <div>
             <h1 style={{ marginBottom: '30px' }}>Tableau de bord</h1>
+
+            {/* ✅ BOUTONS DE PÉRIODE ET EXPORT */}
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <button onClick={handleExportRapport} style={{ backgroundColor: '#10B981', padding: '8px 15px', fontSize: '13px' }}>
+                    📥 Exporter le rapport
+                </button>
+
+                <div style={{ display: 'flex', gap: '5px', backgroundColor: '#fff', padding: '5px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                <button onClick={() => setPeriode('jour')} style={{ padding: '6px 12px', fontSize: '13px', backgroundColor: periode === 'jour' ? 'var(--primary)' : 'transparent', color: periode === 'jour' ? 'white' : 'var(--text-main)' }}>Aujourd'hui</button>
+                <button onClick={() => setPeriode('semaine')} style={{ padding: '6px 12px', fontSize: '13px', backgroundColor: periode === 'semaine' ? 'var(--primary)' : 'transparent', color: periode === 'semaine' ? 'white' : 'var(--text-main)' }}>7 jours</button>
+                <button onClick={() => setPeriode('mois')} style={{ padding: '6px 12px', fontSize: '13px', backgroundColor: periode === 'mois' ? 'var(--primary)' : 'transparent', color: periode === 'mois' ? 'white' : 'var(--text-main)' }}>30 jours</button>
+                <button onClick={() => setPeriode('tout')} style={{ padding: '6px 12px', fontSize: '13px', backgroundColor: periode === 'tout' ? 'var(--primary)' : 'transparent', color: periode === 'tout' ? 'white' : 'var(--text-main)' }}>Tout</button>
+            </div>
+            </div>
 
             {/* GRILLE DE CARTES KPI */}
             <div className="grid-cards" style={{ gridTemplateColumns: 'repeat(2, 1fr)', marginBottom: '20px' }}>

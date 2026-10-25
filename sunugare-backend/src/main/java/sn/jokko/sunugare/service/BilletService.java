@@ -118,8 +118,35 @@ public class BilletService {
                     paiement.setStatut("REMBOURSE");
                     paiementRepository.save(paiement);
                 });
-
-
         return billet;
+    }
+
+    public List<Billet> rechercher(String nom, String statut, java.time.LocalDate dateDebut, java.time.LocalDate dateFin) {
+        java.time.LocalDateTime debut = dateDebut != null ? dateDebut.atStartOfDay() : null;
+        java.time.LocalDateTime fin = dateFin != null ? dateFin.atTime(23, 59, 59) : null;
+
+        return billetRepository.rechercherBillets(
+                (nom != null && !nom.isEmpty()) ? nom : null,
+                (statut != null && !statut.isEmpty()) ? statut : null,
+                debut,
+                fin
+        );
+    }
+
+    public String exporterCsv(List<Billet> billets) {
+        StringBuilder csv = new StringBuilder();
+        // En-tête
+        csv.append("Numero Billet;Passager;Telephone;Siege;Voyage;Statut;Date Emission\n");
+
+        for (Billet b : billets) {
+            csv.append(b.getNumeroBillet()).append(";")
+                    .append(b.getNomPassager()).append(";")
+                    .append(b.getTelephonePassager() != null ? b.getTelephonePassager() : "").append(";")
+                    .append(b.getNumeroSiege()).append(";")
+                    .append(b.getVoyage().getLigne().getVilleDepart().getNom()).append(" -> ").append(b.getVoyage().getLigne().getVilleArrivee().getNom()).append(";")
+                    .append(b.getStatut()).append(";")
+                    .append(b.getDateEmission()).append("\n");
+        }
+        return csv.toString();
     }
 }

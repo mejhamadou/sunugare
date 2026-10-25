@@ -151,4 +151,30 @@ public class VoyageService {
                 .toList();
     }
 
+    public List<Voyage> rechercherVoyages(String statut, java.time.LocalDate dateDebut, java.time.LocalDate dateFin) {
+        java.time.LocalDateTime debut = dateDebut != null ? dateDebut.atStartOfDay() : null;
+        java.time.LocalDateTime fin = dateFin != null ? dateFin.atTime(23, 59, 59) : null;
+        return voyageRepo.rechercherVoyages(
+                (statut != null && !statut.isEmpty()) ? statut : null,
+                debut, fin
+        );
+    }
+
+    public String exporterVoyagesCsv(List<Voyage> voyages) {
+        StringBuilder csv = new StringBuilder();
+        csv.append("ID;Ligne;Date Depart;Quai;Bus;Chauffeur;Prix;Statut\n");
+
+        for (Voyage v : voyages) {
+            csv.append(v.getId()).append(";")
+                    .append(v.getLigne().getVilleDepart().getNom()).append(" -> ").append(v.getLigne().getVilleArrivee().getNom()).append(";")
+                    .append(v.getDateDepart()).append(";")
+                    .append(v.getQuai().getNumero()).append(";")
+                    .append(v.getVehicule().getImmatriculation()).append(";")
+                    .append(v.getChauffeur().getPrenom()).append(";")
+                    .append(v.getPrix()).append(";")
+                    .append(v.getStatut()).append("\n");
+        }
+        return csv.toString();
+    }
+
 }

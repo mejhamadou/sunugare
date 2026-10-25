@@ -222,8 +222,12 @@ export const api = {
     },
 
     // --- DASHBOARD ---
-    getDashboardStats: async () => {
-        const response = await fetch(`${API_URL}/dashboard/stats`, {
+    getDashboardStats: async (dateDebut?: string, dateFin?: string) => {
+        const params = new URLSearchParams();
+        if (dateDebut) params.append('dateDebut', dateDebut);
+        if (dateFin) params.append('dateFin', dateFin);
+
+        const response = await fetch(`${API_URL}/dashboard/stats?${params.toString()}`, {
             headers: { 'Authorization': `Bearer ${getToken()}` },
         });
         if (!response.ok) throw new Error('Erreur stats');
@@ -433,4 +437,11 @@ export const api = {
         if (!response.ok) throw new Error('Erreur audit');
         return response.json();
     },
+
+    exportVoyagesCsv: async () => {
+        const response = await fetch(`${API_URL}/voyages/export`, {
+            headers: { 'Authorization': `Bearer ${getToken()}` },
+        });
+        return response.blob(); // On renvoie le fichier
+    }
 };

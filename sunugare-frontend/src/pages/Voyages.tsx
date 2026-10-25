@@ -4,11 +4,13 @@ import { api } from '../services/api';
 export default function Voyages() {
     const [voyages, setVoyages] = useState<any[]>([]);
 
+
     // Données pour le formulaire
     const [lignes, setLignes] = useState<any[]>([]);
     const [vehicules, setVehicules] = useState<any[]>([]);
     const [chauffeurs, setChauffeurs] = useState<any[]>([]);
     const [quais, setQuais] = useState<any[]>([]);
+    const [filtres, setFiltres] = useState({ statut: '', dateDebut: '', dateFin: '' });
 
     // État du formulaire
     const [formData, setFormData] = useState({
@@ -72,6 +74,32 @@ export default function Voyages() {
         }
     };
 
+    const handleRecherche = async () => {
+        const params = new URLSearchParams();
+        if (filtres.statut) params.append('statut', filtres.statut);
+        if (filtres.dateDebut) params.append('dateDebut', filtres.dateDebut);
+        if (filtres.dateFin) params.append('dateFin', filtres.dateFin);
+
+        const res = await fetch(`/api/voyages/recherche?${params.toString()}`, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        const data = await res.json();
+        setVoyages(data);
+    };
+
+    const handleExportCsv = async () => {
+        try {
+            const blob = await api.exportVoyagesCsv();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'planning_voyages.csv';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } catch (err) { alert("Erreur export"); }
+    };
+
     return (
         <div>
             <h1 style={{ marginBottom: '20px' }}>Planification des Voyages</h1>
@@ -126,7 +154,42 @@ export default function Voyages() {
 
                 {/* LISTE DES VOYAGES */}
                 <div className="card">
-                    <h3>Départs programmés ({voyages.length})</h3>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                        <h3>Départs programmés ({voyages.length})</h3>
+                        <button onClick={handleExportCsv} style={{ backgroundColor: '#10B981', padding: '6px 12px', fontSize: '12px' }}>
+                            📥 Exporter CSV
+                        </button>
+                    </div>
+
+                    {/* ✅ BARRE DE FILTRES */}
+                    <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
+                        <select
+                            value={filtres.statut}
+                            onChange={(e) => setFiltres({...filtres, statut: e.target.value})}
+                            style={{ flex: 1, marginBottom: 0 }}
+                        >
+                            <option value="">Tous les statuts</option>
+                            <option value="PLANIFIE">Planifié</option>
+                            <option value="EMBARQUEMENT">Embarquement</option>
+                            <option value="DEPART">Départ</option>
+                            <option value="ARRIVE">Arrivé</option>
+                            <option value="ANNULE">Annulé</option>
+                        </select>
+                        <input
+                            type="date"
+                            value={filtres.dateDebut}
+                            onChange={(e) => setFiltres({...filtres, dateDebut: e.target.value})}
+                            style={{ flex: 1, marginBottom: 0 }}
+                        />
+                        <input
+                            type="date"
+                            value={filtres.dateFin}
+                            onChange={(e) => setFiltres({...filtres, dateFin: e.target.value})}
+                            style={{ flex: 1, marginBottom: 0 }}
+                        />
+                        <button onClick={handleRecherche} style={{ padding: '0 20px' }}>Filtrer</button>
+                        <button onClick={() => { setFiltres({ statut: '', dateDebut: '', dateFin: '' }); loadData(); }} className="btn-danger" style={{ padding: '0 20px' }}>Reset</button>
+                    </div>
                     <ul>
                         {voyages.map(v => {
                             const colors = getStatutColor(v.statut);

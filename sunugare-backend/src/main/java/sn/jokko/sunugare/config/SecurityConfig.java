@@ -32,24 +32,31 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .cors(org.springframework.security.config.Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // Routes publiques
-                        .requestMatchers("/api/auth/**", "/api/health", "/actuator/**", "/api/billets/*/qrcode", "/api/billets/*/pdf").permitAll()
+                        // 1. ROUTES PUBLIQUES (Sans authentification)
+                        .requestMatchers("/api/auth/**", "/api/health", "/actuator/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/voyages/public/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/billets/public/reserver").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/billets/*/qrcode", "/api/billets/*/pdf").permitAll()
 
-                        // ✅ Routes publiques pour la réservation en ligne
-                        .requestMatchers(HttpMethod.GET, "/api/voyages/public/**", "/api/gares/public/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/billets/public/reserver").permitAll()
+                        // 2. ✅ LA ROUTE DE RECHERCHE (Priorité absolue)
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/billets/recherche-filtres").hasAnyAuthority("ROLE_ADMIN", "ROLE_AGENT", "ROLE_RESPONSABLE")
 
-                        // Routes accessibles à tous les utilisateurs connectés
-                        .requestMatchers(HttpMethod.GET, "/api/voyages/**", "/api/billets/**", "/api/gares/**", "/api/planning/**", "/api/bagages/**", "/api/abonnements/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_AGENT", "ROLE_RESPONSABLE")
-                        .requestMatchers(HttpMethod.POST, "/api/billets", "/api/billets/valider").hasAnyAuthority("ROLE_ADMIN", "ROLE_AGENT", "ROLE_RESPONSABLE")
+                        // 3. AUTRES ROUTES BILLETS (Export, GetAll, Valider, Annuler)
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/billets", "/api/billets/export").hasAnyAuthority("ROLE_ADMIN", "ROLE_AGENT", "ROLE_RESPONSABLE")
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/billets", "/api/billets/valider", "/api/bagages/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_AGENT", "ROLE_RESPONSABLE")
+                        .requestMatchers(org.springframework.http.HttpMethod.PATCH, "/api/billets/*/annuler").hasAnyAuthority("ROLE_ADMIN", "ROLE_AGENT", "ROLE_RESPONSABLE")
 
-                        // ✅ Routes réservées aux Admins et Responsables (Création de voyages, gares, véhicules, utilisateurs...)
-                        .requestMatchers("/api/voyages/**", "/api/utilisateurs/**", "/api/vehicules/**", "/api/chauffeurs/**", "/api/terminaux/**", "/api/quais/**", "/api/lignes/**", "/api/abonnements/**" ).hasAnyAuthority("ROLE_ADMIN", "ROLE_RESPONSABLE")
-                        .requestMatchers("/api/audit/**").hasAuthority("ROLE_ADMIN")
+                        // 4. ROUTES ADMINISTRATION
+                        .requestMatchers("/api/utilisateurs/**", "/api/vehicules/**", "/api/chauffeurs/**", "/api/terminaux/**", "/api/audit/**", "/api/abonnements/**", "/api/dashboard/export-csv").hasAnyAuthority("ROLE_ADMIN", "ROLE_RESPONSABLE")
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/voyages", "/api/lignes/**", "/api/quais/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_RESPONSABLE")
+                        .requestMatchers(org.springframework.http.HttpMethod.PATCH, "/api/voyages/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_RESPONSABLE")
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/voyages", "/api/planning").hasAnyAuthority("ROLE_ADMIN", "ROLE_AGENT", "ROLE_RESPONSABLE")
+                        .requestMatchers("/api/ia/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_RESPONSABLE")
 
-                        // Tout le reste nécessite au moins d'être connecté
+                        // 5. TOUT LE RESTE
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -14,6 +14,8 @@ import Planning from './pages/Planning';
 import ReservationPublique from './pages/ReservationPublique';
 import Abonnements from './pages/Abonnements';
 import JournalAudit from './pages/JournalAudit';
+import Intelligence from "./pages/Intelligence.tsx";
+
 
 function App() {
     return (
@@ -37,6 +39,7 @@ function App() {
                     <Route path="/planning" element={<Planning />} />
                     <Route path="/abonnements" element={<Abonnements />} />
                     <Route path="/audit" element={<JournalAudit />} />
+                    <Route path="/intelligence" element={<Intelligence />} />
                 </Route>
             </Routes>
         </BrowserRouter>

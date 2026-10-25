@@ -1,12 +1,14 @@
 package sn.jokko.sunugare.controller;
 
 import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sn.jokko.sunugare.dto.VoyageRequest;
 import sn.jokko.sunugare.entity.Voyage;
 import sn.jokko.sunugare.service.VoyageService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -23,6 +25,26 @@ public class VoyageController {
         return ResponseEntity.ok(service.getVoyagesPourPublic());
     }
 
+    @GetMapping("/recherche")
+    public ResponseEntity<List<Voyage>> rechercher(
+            @RequestParam(required = false) String statut,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateDebut,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFin) {
+        return ResponseEntity.ok(service.rechercherVoyages(statut, dateDebut, dateFin));
+    }
+
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> exporterCsv() {
+        List<Voyage> voyages = service.getAll(); // Ou filtrer si besoin
+        String csvData = service.exporterVoyagesCsv(voyages);
+        byte[] output = csvData.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+
+        return ResponseEntity.ok()
+                .header("Content-Type", "text/csv; charset=UTF-8")
+                .header("Content-Disposition", "attachment; filename=planning_voyages.csv")
+                .body(output);
+    }
+
     @PostMapping
     public ResponseEntity<Voyage> creer(@Valid @RequestBody VoyageRequest request, java.security.Principal principal) {
         // ✅ On passe principal.getName() (l'email) au service
@@ -34,6 +56,8 @@ public class VoyageController {
         // principal.getName() renvoie l'email de l'utilisateur connecté
         return ResponseEntity.ok(service.getAllVoyagesPourUtilisateur(principal.getName()));
     }
+
+
 
     @PatchMapping("/{id}/statut")
     public ResponseEntity<Voyage> changerStatut(@PathVariable Long id, @RequestParam String statut) {
