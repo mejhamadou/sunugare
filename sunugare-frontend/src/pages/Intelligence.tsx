@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 
-
 export default function Intelligence() {
     const [quais, setQuais] = useState<any[]>([]);
     const [tendances, setTendances] = useState<any[]>([]);
