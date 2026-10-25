@@ -47,7 +47,7 @@ public class PdfService {
             document.add(new Paragraph("Siège : " + billet.getNumeroSiege(), normalFont));
             document.add(new Paragraph(" "));
 
-            document.add(new Paragraph("Prix payé : " + billet.getVoyage().getPrix() + " FCFA", boldFont));
+            document.add(new Paragraph("Prix payé : " + billet.getVoyage().getPrixFinal().intValue() + " FCFA", boldFont));
             document.add(new Paragraph("Méthode de paiement : " + (paiement != null ? paiement.getMethode() : "Non payé"), normalFont));
             document.add(new Paragraph(" "));
 

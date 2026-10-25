@@ -35,4 +35,9 @@ public class IntelligenceController {
     public ResponseEntity<List<String>> getRecommandations() {
         return ResponseEntity.ok(intelligenceService.genererRecommandations());
     }
+
+    @GetMapping("/tarification")
+    public ResponseEntity<List<Map<String, Object>>> getTarification() {
+        return ResponseEntity.ok(intelligenceService.suggererTarification());
+    }
 }

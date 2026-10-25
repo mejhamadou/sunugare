@@ -26,8 +26,10 @@ export default function Layout() {
                     {/* ✅ MENUS VISIBLES PAR TOUS */}
                     <Link to="/planning" className={`nav-item ${location.pathname === '/planning' ? 'active' : ''}`}>⏱️ Planning</Link>
                     <Link to="/billetterie" className={`nav-item ${location.pathname === '/billetterie' ? 'active' : ''}`}>🎟️ Billetterie</Link>
+                    <Link to="/colis" className={`nav-item ${location.pathname === '/colis' ? 'active' : ''}`}>📦 Colis (Fret)</Link>
                     <Link to="/controle" className={`nav-item ${location.pathname === '/controle' ? 'active' : ''}`}>🛡️ Contrôle</Link>
                     <Link to="/abonnements" className={`nav-item ${location.pathname === '/abonnements' ? 'active' : ''}`}>🎫 Abonnements</Link>
+
 
                     {/* ✅ MENUS VISIBLES UNIQUEMENT PAR L'ADMIN/RESPONSABLE */}
                     {isAdmin && (

@@ -15,6 +15,9 @@ import ReservationPublique from './pages/ReservationPublique';
 import Abonnements from './pages/Abonnements';
 import JournalAudit from './pages/JournalAudit';
 import Intelligence from "./pages/Intelligence.tsx";
+import Colis from './pages/Colis';
+import SuiviColis from './pages/SuiviColis';
+import LaisserAvis from "./pages/LaisserAvis.tsx";
 
 
 function App() {
@@ -24,6 +27,8 @@ function App() {
                 <Route path="/" element={<Navigate to="/login" replace />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/reserver" element={<ReservationPublique />} />
+                <Route path="/suivi-colis" element={<SuiviColis />} />
+                <Route path="/avis/:billetId" element={<LaisserAvis />} />
 
                 {/* Routes protégées enveloppées dans le Layout */}
                 <Route element={<Layout />}>
@@ -40,6 +45,7 @@ function App() {
                     <Route path="/abonnements" element={<Abonnements />} />
                     <Route path="/audit" element={<JournalAudit />} />
                     <Route path="/intelligence" element={<Intelligence />} />
+                    <Route path="/colis" element={<Colis />} />
                 </Route>
             </Routes>
         </BrowserRouter>

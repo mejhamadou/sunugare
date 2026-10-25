@@ -14,7 +14,7 @@ export default function Voyages() {
 
     // État du formulaire
     const [formData, setFormData] = useState({
-        ligneId: '', vehiculeId: '', chauffeurId: '', quaiId: '', dateDepart: '', prix: ''
+        ligneId: '', vehiculeId: '', chauffeurId: '', quaiId: '', dateDepart: '', prix: '', multiplicateurPrix: '1.0'
     });
 
     const loadData = async () => {
@@ -43,9 +43,10 @@ export default function Voyages() {
                 chauffeurId: Number(formData.chauffeurId),
                 quaiId: Number(formData.quaiId),
                 dateDepart: formData.dateDepart + ':00',
-                prix: Number(formData.prix)
+                prix: Number(formData.prix),
+
             });
-            setFormData({ ligneId: '', vehiculeId: '', chauffeurId: '', quaiId: '', dateDepart: '', prix: '' });
+            setFormData({ ligneId: '', vehiculeId: '', chauffeurId: '', quaiId: '', dateDepart: '', prix: '', multiplicateurPrix: '1.0' });
             loadData();
         } catch (err) {
             alert("Erreur lors de la création du voyage");
@@ -146,8 +147,18 @@ export default function Voyages() {
                         <input type="datetime-local" value={formData.dateDepart} onChange={(e) => setFormData({...formData, dateDepart: e.target.value})} required />
 
                         <label>Prix (FCFA)</label>
-                        <input type="number" value={formData.prix} onChange={(e) => setFormData({...formData, prix: e.target.value})} required />
 
+                        <input type="number" value={formData.prix} onChange={(e) => setFormData({...formData, prix: e.target.value})} required />
+                        <label>Tarification (Multiplicateur)</label>
+                        <select
+                            value={formData.multiplicateurPrix}
+                            onChange={(e) => setFormData({...formData, multiplicateurPrix: e.target.value})}
+                        >
+                            <option value="0.8">Réduit (-20%) - Heures creuses</option>
+                            <option value="1.0">Normal (Prix de base)</option>
+                            <option value="1.2">Majoré (+20%) - Heure de pointe / Fête</option>
+                            <option value="1.5">Très majoré (+50%) - Forte demande</option>
+                        </select>
                         <button type="submit" style={{ marginTop: '15px' }}>Créer le voyage</button>
                     </form>
                 </div>
@@ -225,6 +236,11 @@ export default function Voyages() {
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '10px' }}>
                                         <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                                             Bus: {v.vehicule?.immatriculation} | Chauffeur: {v.chauffeur?.prenom}
+                                        </div>
+                                        <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>
+                                            {v.prix * (v.multiplicateurPrix || 1)} FCFA
+                                            {v.multiplicateurPrix > 1 && <span style={{ fontSize: '10px', color: '#EF4444', marginLeft: '5px' }}>(Majoré)</span>}
+                                            {v.multiplicateurPrix < 1 && <span style={{ fontSize: '10px', color: '#10B981', marginLeft: '5px' }}>(Réduit)</span>}
                                         </div>
 
                                         {/* ✅ Boutons d'action */}

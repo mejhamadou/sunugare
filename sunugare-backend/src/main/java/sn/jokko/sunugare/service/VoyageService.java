@@ -18,8 +18,9 @@ public class VoyageService {
     private final UserRepository userRepository;
     private final ConformiteService conformiteService;
     private final AuditService auditService;
+    private final AvisService avisService;
 
-    public VoyageService(VoyageRepository voyageRepo, LigneRepository ligneRepo, VehiculeRepository vehiculeRepo, ChauffeurRepository chauffeurRepo, QuaiRepository quaiRepo, NotificationService notificationService, UserRepository userRepository, AuditService auditService) {
+    public VoyageService(VoyageRepository voyageRepo, LigneRepository ligneRepo, VehiculeRepository vehiculeRepo, ChauffeurRepository chauffeurRepo, QuaiRepository quaiRepo, NotificationService notificationService, UserRepository userRepository, AuditService auditService, AvisService avisService) {
         this.voyageRepo = voyageRepo;
         this.ligneRepo = ligneRepo;
         this.vehiculeRepo = vehiculeRepo;
@@ -29,6 +30,7 @@ public class VoyageService {
         this.userRepository = userRepository;
         this.conformiteService = new ConformiteService();
         this.auditService = auditService;
+        this.avisService = avisService;
 
     }
 
@@ -56,6 +58,7 @@ public class VoyageService {
         v.setDateDepart(req.getDateDepart());
         v.setPrix(req.getPrix());
         v.setStatut("PLANIFIE");
+        v.setMultiplicateurPrix(req.getMultiplicateurPrix() != null ? req.getMultiplicateurPrix() : 1.0);
 
         // ✅ On sauvegarde d'abord pour générer l'ID
         Voyage voyageSauvegarde = voyageRepo.save(v);
@@ -98,17 +101,15 @@ public class VoyageService {
     }
 
     public Voyage changerStatut(Long voyageId, String nouveauStatut) {
-        Voyage voyage = voyageRepo.findById(voyageId)
-                .orElseThrow(() -> new RuntimeException("Voyage introuvable"));
-
-        // On vérifie que le statut est valide
-        List<String> statutsValides = List.of("PLANIFIE", "EMBARQUEMENT", "DEPART", "ARRIVE", "ANNULE");
-        if (!statutsValides.contains(nouveauStatut)) {
-            throw new RuntimeException("Statut invalide");
-        }
-
+        Voyage voyage = voyageRepo.findById(voyageId).orElseThrow();
         voyage.setStatut(nouveauStatut);
-        return voyageRepo.save(voyage);
+        Voyage voyageMaj = voyageRepo.save(voyage);
+
+        // ✅ Si le bus est ARRIVÉ, on demande les avis
+        if (nouveauStatut.equals("ARRIVE")) {
+            avisService.demanderAvisPourVoyage(voyageId);
+        }
+        return voyageMaj;
     }
 
     public Voyage signalerRetard(Long voyageId, Integer minutes) {

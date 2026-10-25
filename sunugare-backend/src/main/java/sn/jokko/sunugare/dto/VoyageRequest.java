@@ -10,6 +10,7 @@ public class VoyageRequest {
     @NotNull private Long quaiId;
     @NotNull private LocalDateTime dateDepart;
     @NotNull private Double prix;
+    private Double multiplicateurPrix;
 
     // Getters et Setters...
     public Long getLigneId() { return ligneId; }
@@ -24,4 +25,6 @@ public class VoyageRequest {
     public void setDateDepart(LocalDateTime dateDepart) { this.dateDepart = dateDepart; }
     public Double getPrix() { return prix; }
     public void setPrix(Double prix) { this.prix = prix; }
+    public Double getMultiplicateurPrix() { return multiplicateurPrix; }
+    public void setMultiplicateurPrix(Double multiplicateurPrix) {this.multiplicateurPrix = multiplicateurPrix;}
 }

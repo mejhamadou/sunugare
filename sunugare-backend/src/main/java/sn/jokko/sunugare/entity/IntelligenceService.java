@@ -1,6 +1,7 @@
 package sn.jokko.sunugare.service;
 
 import org.springframework.stereotype.Service;
+import sn.jokko.sunugare.entity.Voyage;
 import sn.jokko.sunugare.repository.BilletRepository;
 import sn.jokko.sunugare.repository.PaiementRepository;
 import sn.jokko.sunugare.repository.VoyageRepository;
@@ -89,4 +90,29 @@ public class IntelligenceService {
 
         return conseils;
     }
+
+    public List<Map<String, Object>> suggererTarification() {
+        List<Map<String, Object>> suggestions = new ArrayList<>();
+
+        // Exemple de règle métier simple (en attendant un vrai modèle ML) :
+        // Si plus de 80% des billets d'un voyage sont vendus, on suggère d'augmenter le prix du prochain
+
+        List<Voyage> prochainsVoyages = voyageRepo.findAll().stream()
+                .filter(v -> v.getStatut().equals("PLANIFIE"))
+                .toList();
+
+        for (Voyage v : prochainsVoyages) {
+            long billetsVendus = billetRepo.findAll().stream().filter(b -> b.getVoyage().getId().equals(v.getId())).count();
+            int capacite = v.getVehicule().getCapacite();
+
+            if (billetsVendus >= capacite * 0.8) {
+                Map<String, Object> reco = new HashMap<>();
+                reco.put("voyage", v.getLigne().getVilleDepart().getNom() + " -> " + v.getLigne().getVilleArrivee().getNom());
+                reco.put("message", "Ce voyage est rempli à " + (billetsVendus * 100 / capacite) + "%. Augmentez le prix de 20% pour maximiser les recettes.");
+                suggestions.add(reco);
+            }
+        }
+        return suggestions;
+    }
+
 }

@@ -4,12 +4,16 @@ export default function Intelligence() {
     const [quais, setQuais] = useState<any[]>([]);
     const [tendances, setTendances] = useState<any[]>([]);
     const [conseils, setConseils] = useState<string[]>([]);
+    const [tarification, setTarification] = useState<any[]>([]); // ✅ Nouvel état
 
     useEffect(() => {
-        // On appelle les 3 routes IA
-        fetch('/api/ia/quais', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } }).then(r => r.json()).then(setQuais);
-        fetch('/api/ia/tendances', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } }).then(r => r.json()).then(setTendances);
-        fetch('/api/ia/recommandations', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } }).then(r => r.json()).then(setConseils);
+        const token = localStorage.getItem('token');
+        const headers = { 'Authorization': `Bearer ${token}` };
+
+        fetch('/api/ia/quais', { headers }).then(r => r.json()).then(setQuais);
+        fetch('/api/ia/tendances', { headers }).then(r => r.json()).then(setTendances);
+        fetch('/api/ia/recommandations', { headers }).then(r => r.json()).then(setConseils);
+        fetch('/api/ia/tarification', { headers }).then(r => r.json()).then(setTarification); // ✅ Nouvel appel
     }, []);
 
     return (
@@ -27,9 +31,10 @@ export default function Intelligence() {
             </div>
 
             <div className="grid-cards" style={{ gridTemplateColumns: '1fr 1fr' }}>
+
                 {/* TENDANCES */}
                 <div className="card">
-                    <h3>📈 Analyse des tendances (Jours les plus chargés)</h3>
+                    <h3>📈 Analyse des tendances</h3>
                     <ul>
                         {tendances.map(t => (
                             <li key={t.jour} style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -53,6 +58,26 @@ export default function Intelligence() {
                         </ul>
                     )}
                 </div>
+
+                {/* ✅ NOUVELLE CARTE : TARIFICATION DYNAMIQUE */}
+                <div className="card" style={{ gridColumn: '1 / -1', borderLeft: '4px solid #F59E0B' }}>
+                    <h3>💰 Tarification Dynamique</h3>
+                    <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '10px' }}>
+                        Recommandations basées sur le taux de remplissage des bus.
+                    </p>
+                    {tarification.length === 0 ? (
+                        <p style={{ color: 'var(--text-muted)' }}>Aucun bus n'est presque plein pour le moment.</p>
+                    ) : (
+                        <ul>
+                            {tarification.map((t, i) => (
+                                <li key={i} style={{ borderLeft: '3px solid #F59E0B' }}>
+                                    <strong>{t.voyage}</strong> : {t.message}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+
             </div>
         </div>
     );

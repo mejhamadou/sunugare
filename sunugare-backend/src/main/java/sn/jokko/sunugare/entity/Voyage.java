@@ -52,4 +52,17 @@ public class Voyage {
     public void setStatut(String statut) { this.statut = statut; }
     public Integer getRetardMinutes() { return retardMinutes; }
     public void setRetardMinutes(Integer retardMinutes) { this.retardMinutes = retardMinutes; }
-}
+
+    @Column(name = "multiplicateur_prix")
+    private Double multiplicateurPrix = 1.0;
+
+    public Double getMultiplicateurPrix() { return multiplicateurPrix; }
+    public void setMultiplicateurPrix(Double multiplicateurPrix) { this.multiplicateurPrix = multiplicateurPrix; }
+
+    // La méthode utilitaire :
+    public Double getPrixFinal() {
+        if (this.prix == null) return 0.0;
+        if (this.multiplicateurPrix == null) return this.prix;
+        return this.prix * this.multiplicateurPrix;
+    }
+    }

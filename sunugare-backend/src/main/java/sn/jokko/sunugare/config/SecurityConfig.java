@@ -40,6 +40,9 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/voyages/public/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/billets/public/reserver").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/billets/*/qrcode", "/api/billets/*/pdf").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/colis/suivi/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/avis/billet/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/avis").permitAll()
 
                         // 2. ✅ LA ROUTE DE RECHERCHE (Priorité absolue)
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/billets/recherche-filtres").hasAnyAuthority("ROLE_ADMIN", "ROLE_AGENT", "ROLE_RESPONSABLE")

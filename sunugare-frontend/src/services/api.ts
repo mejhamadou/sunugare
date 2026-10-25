@@ -443,5 +443,32 @@ export const api = {
             headers: { 'Authorization': `Bearer ${getToken()}` },
         });
         return response.blob(); // On renvoie le fichier
-    }
+    },
+
+    // --- COLIS ---
+    getColis: async () => {
+        const response = await fetch(`${API_URL}/colis`, {
+            headers: { 'Authorization': `Bearer ${getToken()}` },
+        });
+        if (!response.ok) throw new Error('Erreur colis');
+        return response.json();
+    },
+    createColis: async (data: any) => {
+        const response = await fetch(`${API_URL}/colis`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error('Erreur création colis');
+        return response.json();
+    },
+    changerStatutColis: async (id: number, statut: string) => {
+        const response = await fetch(`${API_URL}/colis/${id}/statut?statut=${statut}`, {
+            method: 'PATCH',
+            headers: { 'Authorization': `Bearer ${getToken()}` },
+        });
+        if (!response.ok) throw new Error('Erreur changement statut');
+        return response.json();
+    },
+
 };
