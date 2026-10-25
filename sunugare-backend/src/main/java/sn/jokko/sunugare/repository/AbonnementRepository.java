@@ -5,4 +5,6 @@ import sn.jokko.sunugare.entity.Abonnement;
 
 
 public interface AbonnementRepository extends JpaRepository<Abonnement, Long> {
+
+    java.util.Optional<Abonnement> findByCodeAbonnement(String codeAbonnement);
 }

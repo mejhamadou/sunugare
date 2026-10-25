@@ -66,28 +66,27 @@ export default function Controle() {
                 {/* ZONE DE SCAN */}
                 <div className="card">
                     <h3>Scanner un billet</h3>
-
                     {!scanActif ? (
                         <div style={{ textAlign: 'center', padding: '20px 0' }}>
                             <p style={{ color: 'var(--text-muted)', marginBottom: '20px' }}>
-                                Utilisez la caméra de votre téléphone ou entrez le code manuellement.
+                                Scannez le QR Code du passager.
                             </p>
-                            <button onClick={() => setScanActif(true)} style={{ backgroundColor: '#8B5CF6', marginBottom: '20px', width: '100%' }}>
-                                📷 Activer la caméra
+                            <button onClick={() => setScanActif(true)} style={{ backgroundColor: '#8B5CF6', marginBottom: '20px', width: '100%', padding: '20px', fontSize: '18px', borderRadius: '10px' }}>
+                                📷 Ouvrir la caméra
                             </button>
 
                             <div style={{ textAlign: 'left' }}>
-                                <label>Ou saisir le code manuellement :</label>
+                                <label>Saisie manuelle :</label>
                                 <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '10px' }}>
                                     <input
                                         type="text"
-                                        placeholder="SUN-XXXXXX"
+                                        placeholder="Code"
                                         value={numeroBillet}
                                         onChange={(e) => setNumeroBillet(e.target.value.toUpperCase())}
                                         required
-                                        style={{ flex: 1, marginBottom: 0 }}
+                                        style={{ flex: 1, marginBottom: 0, fontSize: '18px', textAlign: 'center' }}
                                     />
-                                    <button type="submit">Valider</button>
+                                    <button type="submit" style={{ padding: '0 20px' }}>OK</button>
                                 </form>
                             </div>
                         </div>
@@ -123,7 +122,7 @@ export default function Controle() {
                             <h2 style={{ fontSize: '20px', marginBottom: '15px', textAlign: 'center' }}>✅ Billet Valide</h2>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px' }}>
                                 <p><strong>Passager :</strong> {resultat.nomPassager}</p>
-                                <p><strong>Siège :</strong> {resultat.numeroSiege}</p>
+                                {resultat.numeroSiege !== 'Abonnement' && <p><strong>Siège :</strong> {resultat.numeroSiege}</p>}
                                 <p><strong>Voyage :</strong> {resultat.voyage?.ligne?.villeDepart?.nom} ➔ {resultat.voyage?.ligne?.villeArrivee?.nom}</p>
                             </div>
                         </div>

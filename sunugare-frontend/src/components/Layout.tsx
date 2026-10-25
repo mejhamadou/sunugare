@@ -68,6 +68,19 @@ export default function Layout() {
                     <Outlet />
                 </div>
             </main>
+
+            {/* ✅ MENU MOBILE */}
+            <nav className="mobile-nav">
+                <Link to="/planning" className={`mobile-nav-item ${location.pathname === '/planning' ? 'active' : ''}`}>
+                    <span className="icon">⏱️</span> Planning
+                </Link>
+                <Link to="/billetterie" className={`mobile-nav-item ${location.pathname === '/billetterie' ? 'active' : ''}`}>
+                    <span className="icon">🎟️</span> Vendre
+                </Link>
+                <Link to="/controle" className={`mobile-nav-item ${location.pathname === '/controle' ? 'active' : ''}`}>
+                    <span className="icon">🛡️</span> Contrôle
+                </Link>
+            </nav>
         </div>
     );
 }

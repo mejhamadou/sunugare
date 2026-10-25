@@ -7,6 +7,7 @@ import sn.jokko.sunugare.dto.BilletRequest;
 import sn.jokko.sunugare.entity.Billet;
 import sn.jokko.sunugare.entity.Paiement;
 import sn.jokko.sunugare.repository.PaiementRepository;
+import sn.jokko.sunugare.service.AbonnementService;
 import sn.jokko.sunugare.service.BilletService;
 import sn.jokko.sunugare.service.PdfService;
 import sn.jokko.sunugare.service.QrCodeService;
@@ -21,12 +22,14 @@ public class BilletController {
     private final QrCodeService qrCodeService;
     private final PdfService pdfService;
     private final PaiementRepository paiementRepository;
+    private final AbonnementService abonnementService;
 
-    public BilletController(BilletService service, QrCodeService qrCodeService, PdfService pdfService, PaiementRepository paiementRepository) {
+    public BilletController(BilletService service, QrCodeService qrCodeService, PdfService pdfService, PaiementRepository paiementRepository, AbonnementService abonnementService) {
         this.service = service;
         this.qrCodeService = qrCodeService;
         this.pdfService = pdfService;
         this.paiementRepository = paiementRepository;
+        this.abonnementService = abonnementService;
     }
 
     @PostMapping
@@ -61,12 +64,30 @@ public class BilletController {
     @PostMapping("/valider")
     public ResponseEntity<?> validerBillet(@RequestBody Map<String, String> request) {
         try {
-            String numeroBillet = request.get("numeroBillet");
-            if (numeroBillet == null || numeroBillet.isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Le numéro de billet est requis"));
+            String code = request.get("numeroBillet");
+            if (code == null || code.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Le code est requis"));
             }
-            Billet billet = service.validerBillet(numeroBillet);
+
+            // ✅ Si c'est un abonnement
+            if (code.startsWith("ABO-")) {
+                var abonnement = abonnementService.validerAbonnement(code);
+                // On crée un objet factice pour renvoyer les infos au frontend
+                Map<String, Object> response = new java.util.HashMap<>();
+                response.put("nomPassager", abonnement.getNomPassager());
+                response.put("numeroSiege", "Abonnement");
+                response.put("numeroBillet", abonnement.getCodeAbonnement());
+                response.put("voyage", Map.of("ligne", Map.of(
+                        "villeDepart", Map.of("nom", abonnement.getLigne().getVilleDepart().getNom()),
+                        "villeArrivee", Map.of("nom", abonnement.getLigne().getVilleArrivee().getNom())
+                )));
+                return ResponseEntity.ok(response);
+            }
+
+            // ✅ Sinon, c'est un billet normal
+            Billet billet = service.validerBillet(code);
             return ResponseEntity.ok(billet);
+
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }

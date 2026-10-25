@@ -36,7 +36,25 @@ public class AbonnementService {
         return abonnementRepository.save(abo);
     }
 
+    public Abonnement validerAbonnement(String code) {
+        Abonnement abo = abonnementRepository.findByCodeAbonnement(code)
+                .orElseThrow(() -> new RuntimeException("Abonnement introuvable"));
+
+        java.time.LocalDate aujourdhui = java.time.LocalDate.now();
+
+        if (abo.getDateDebut().isAfter(aujourdhui)) {
+            throw new RuntimeException("Cet abonnement n'est pas encore actif (débute le " + abo.getDateDebut() + ")");
+        }
+        if (abo.getDateFin().isBefore(aujourdhui)) {
+            throw new RuntimeException("Cet abonnement est expiré depuis le " + abo.getDateFin());
+        }
+
+        return abo;
+    }
+
     public List<Abonnement> getAll() {
         return abonnementRepository.findAll();
     }
+
+
 }
