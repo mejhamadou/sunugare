@@ -58,6 +58,36 @@ sunugare/
 ├── sunugare-frontend/      # Application React
 ├── docker-compose.yml      # Orchestration des conteneurs
 └── .github/workflows/      # Pipeline CI
+
+## ✨ Fonctionnalités Principales (V2)
+
+### 🔐 Sécurité & Administration
+- Authentification JWT avec gestion des rôles (Admin, Responsable, Agent).
+- Isolation des données par gare (Multi-Tenant).
+- Gestion des utilisateurs (création, modification, attribution de gare).
+- Gestion du référentiel : Gares, Terminaux, Quais, Lignes, Compagnies, Véhicules, Chauffeurs.
+
+### 🚌 Opérations & Planning
+- Planification des voyages avec assignation automatique des quais.
+- Cycle de vie des voyages (Planifié ➔ Embarquement ➔ Départ ➔ Arrivé ➔ Annulé).
+- Gestion des retards en temps réel sur le planning.
+- Notifications SMS simulées aux passagers en cas de retard.
+- Contrôle de conformité automatique (assurance, carte grise, permis de conduire) avec alertes d'expiration.
+
+### 🎟️ Billetterie & Ventes
+- Caisse rapide avec génération de QR Code unique par billet.
+- Impression des billets au format PDF (avec QR Code).
+- Gestion des bagages (description, poids, tarif).
+- Annulation et remboursement des billets.
+- Encaissement multi-canal (Espèces, Wave, Orange Money).
+- Gestion des abonnements passagers avec codes uniques.
+
+### 🌐 Grand Public & Intelligence
+- Portail de réservation en ligne accessible sans compte.
+- Contrôle d'embarquement par scan de QR Code (compatible mobile via PWA).
+- Tableau de bord analytique (Recettes, Billets vendus, Répartition des paiements).
+- Module de prédiction d'affluence basé sur l'historique.
+
 👨‍💻 Auteur
 Développeur : [Mejhamadou Tidiane SAMB]
 
