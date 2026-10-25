@@ -31,4 +31,10 @@ public class VehiculeController {
     public ResponseEntity<List<Vehicule>> getAll() {
         return ResponseEntity.ok(service.getAll());
     }
+
+    @PatchMapping("/{id}/valider-manuellement")
+    public ResponseEntity<Vehicule> validerManuellement(@PathVariable Long id, java.security.Principal principal) {
+        return ResponseEntity.ok(service.validerManuellement(id, principal.getName()));
+    }
+
 }

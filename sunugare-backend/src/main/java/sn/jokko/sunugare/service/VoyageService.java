@@ -17,8 +17,9 @@ public class VoyageService {
     private final NotificationService notificationService;
     private final UserRepository userRepository;
     private final ConformiteService conformiteService;
+    private final AuditService auditService;
 
-    public VoyageService(VoyageRepository voyageRepo, LigneRepository ligneRepo, VehiculeRepository vehiculeRepo, ChauffeurRepository chauffeurRepo, QuaiRepository quaiRepo, NotificationService notificationService, UserRepository userRepository) {
+    public VoyageService(VoyageRepository voyageRepo, LigneRepository ligneRepo, VehiculeRepository vehiculeRepo, ChauffeurRepository chauffeurRepo, QuaiRepository quaiRepo, NotificationService notificationService, UserRepository userRepository, AuditService auditService) {
         this.voyageRepo = voyageRepo;
         this.ligneRepo = ligneRepo;
         this.vehiculeRepo = vehiculeRepo;
@@ -27,10 +28,11 @@ public class VoyageService {
         this.notificationService = notificationService;
         this.userRepository = userRepository;
         this.conformiteService = new ConformiteService();
+        this.auditService = auditService;
 
     }
 
-    public Voyage creerVoyage(VoyageRequest req) {
+    public Voyage creerVoyage(VoyageRequest req, String email) {
         Ligne ligne = ligneRepo.findById(req.getLigneId()).orElseThrow(() -> new RuntimeException("Ligne introuvable"));
         Vehicule vehicule = vehiculeRepo.findById(req.getVehiculeId()).orElseThrow(() -> new RuntimeException("Véhicule introuvable"));
         Chauffeur chauffeur = chauffeurRepo.findById(req.getChauffeurId()).orElseThrow(() -> new RuntimeException("Chauffeur introuvable"));
@@ -55,7 +57,19 @@ public class VoyageService {
         v.setPrix(req.getPrix());
         v.setStatut("PLANIFIE");
 
-        return voyageRepo.save(v);
+        // ✅ On sauvegarde d'abord pour générer l'ID
+        Voyage voyageSauvegarde = voyageRepo.save(v);
+
+        // ✅ On log l'action avec la variable correcte
+        auditService.logAction(
+                "CREATION_VOYAGE",
+                "Voyage",
+                voyageSauvegarde.getId(), // L'ID du voyage qui vient d'être créé
+                email,
+                "Voyage créé : " + ligne.getVilleDepart().getNom() + " -> " + ligne.getVilleArrivee().getNom()
+        );
+
+        return voyageSauvegarde;
     }
 
     private Quai trouverQuaiDisponible(java.time.LocalDateTime dateDepart) {

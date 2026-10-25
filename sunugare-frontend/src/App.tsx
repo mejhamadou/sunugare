@@ -13,6 +13,7 @@ import Infrastructures from './pages/Infrastructures';
 import Planning from './pages/Planning';
 import ReservationPublique from './pages/ReservationPublique';
 import Abonnements from './pages/Abonnements';
+import JournalAudit from './pages/JournalAudit';
 
 function App() {
     return (
@@ -35,6 +36,7 @@ function App() {
                     <Route path="/infrastructures" element={<Infrastructures />} />
                     <Route path="/planning" element={<Planning />} />
                     <Route path="/abonnements" element={<Abonnements />} />
+                    <Route path="/audit" element={<JournalAudit />} />
                 </Route>
             </Routes>
         </BrowserRouter>

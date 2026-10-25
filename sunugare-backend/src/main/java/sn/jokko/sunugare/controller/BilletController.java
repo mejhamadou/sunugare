@@ -114,9 +114,9 @@ public class BilletController {
     }
 
     @PatchMapping("/{id}/annuler")
-    public ResponseEntity<?> annuler(@PathVariable Long id) {
+    public ResponseEntity<?> annuler(@PathVariable Long id, java.security.Principal principal) {
         try {
-            Billet billet = service.annulerBillet(id);
+            Billet billet = service.annulerBillet(id, principal.getName());
             return ResponseEntity.ok(billet);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));

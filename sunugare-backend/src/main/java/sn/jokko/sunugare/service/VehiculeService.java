@@ -13,10 +13,12 @@ import java.util.List;
 public class VehiculeService {
     private final VehiculeRepository vehiculeRepository;
     private final CompagnieRepository compagnieRepository;
+    private final AuditService auditService;
 
-    public VehiculeService(VehiculeRepository vehiculeRepository, CompagnieRepository compagnieRepository) {
+    public VehiculeService(VehiculeRepository vehiculeRepository, CompagnieRepository compagnieRepository, AuditService auditService) {
         this.vehiculeRepository = vehiculeRepository;
         this.compagnieRepository = compagnieRepository;
+        this.auditService = auditService;
     }
 
     public Vehicule creerVehicule(VehiculeRequest request) {
@@ -61,5 +63,24 @@ public class VehiculeService {
         Vehicule v = vehiculeRepository.findById(id).orElseThrow();
         v.setConformiteValideeManuellement(true);
         return vehiculeRepository.save(v);
+    }
+
+    public Vehicule validerManuellement(Long id, String email) {
+        Vehicule v = vehiculeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Véhicule introuvable"));
+
+        v.setConformiteValideeManuellement(true);
+        Vehicule vehiculeSauvegarde = vehiculeRepository.save(v);
+
+        // ✅ On log la dérogation
+        auditService.logAction(
+                "DEROGATION_CONFORMITE",
+                "Vehicule",
+                id,
+                email,
+                "Validation manuelle forcée pour le véhicule " + v.getImmatriculation()
+        );
+
+        return vehiculeSauvegarde;
     }
 }

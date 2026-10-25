@@ -425,4 +425,12 @@ export const api = {
         }
         return response.json();
     },
+
+    getAuditLogs: async () => {
+        const response = await fetch(`${API_URL}/audit`, {
+            headers: { 'Authorization': `Bearer ${getToken()}` },
+        });
+        if (!response.ok) throw new Error('Erreur audit');
+        return response.json();
+    },
 };

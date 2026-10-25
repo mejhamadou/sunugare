@@ -24,8 +24,9 @@ public class VoyageController {
     }
 
     @PostMapping
-    public ResponseEntity<Voyage> creer(@Valid @RequestBody VoyageRequest request) {
-        return ResponseEntity.ok(service.creerVoyage(request));
+    public ResponseEntity<Voyage> creer(@Valid @RequestBody VoyageRequest request, java.security.Principal principal) {
+        // ✅ On passe principal.getName() (l'email) au service
+        return ResponseEntity.ok(service.creerVoyage(request, principal.getName()));
     }
 
     @GetMapping

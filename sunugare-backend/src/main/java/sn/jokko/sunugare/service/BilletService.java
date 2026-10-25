@@ -10,6 +10,7 @@ import sn.jokko.sunugare.repository.PaiementRepository;
 import sn.jokko.sunugare.repository.UserRepository;
 import sn.jokko.sunugare.repository.VoyageRepository;
 
+
 import java.util.List;
 import java.util.UUID;
 
@@ -19,12 +20,15 @@ public class BilletService {
     private final VoyageRepository voyageRepository;
     private final UserRepository userRepository;
     private final PaiementRepository paiementRepository;
+    private final AuditService auditService;
 
-    public BilletService(BilletRepository billetRepository, VoyageRepository voyageRepository, UserRepository userRepository, PaiementRepository paiementRepository) {
+
+    public BilletService(BilletRepository billetRepository, VoyageRepository voyageRepository, UserRepository userRepository, PaiementRepository paiementRepository, AuditService auditService) {
         this.billetRepository = billetRepository;
         this.voyageRepository = voyageRepository;
         this.userRepository = userRepository;
         this.paiementRepository = paiementRepository;
+        this.auditService = auditService;
     }
 
     public Billet vendreBillet(BilletRequest request) {
@@ -82,7 +86,7 @@ public class BilletService {
         return List.of();
     }
 
-   public Billet annulerBillet(Long billetId) {
+   public Billet annulerBillet(Long billetId, String email) {
         Billet billet = billetRepository.findById(billetId)
                 .orElseThrow(() -> new RuntimeException("Billet introuvable"));
 
@@ -97,6 +101,15 @@ public class BilletService {
         billet.setStatut("ANNULE");
         billetRepository.save(billet);
 
+        // ✅ On enregistre l'action
+       auditService.logAction(
+               "ANNULATION_BILLET",
+               "Billet",
+               billetId,
+               email,
+               "Annulation du billet " + billet.getNumeroBillet() + " pour " + billet.getNomPassager()
+       );
+
         // 2. On cherche le paiement associé pour le rembourser
         paiementRepository.findAll().stream()
                 .filter(p -> p.getBillet().getId().equals(billetId))
@@ -105,6 +118,7 @@ public class BilletService {
                     paiement.setStatut("REMBOURSE");
                     paiementRepository.save(paiement);
                 });
+
 
         return billet;
     }

@@ -47,6 +47,7 @@ public class SecurityConfig {
 
                         // ✅ Routes réservées aux Admins et Responsables (Création de voyages, gares, véhicules, utilisateurs...)
                         .requestMatchers("/api/voyages/**", "/api/utilisateurs/**", "/api/vehicules/**", "/api/chauffeurs/**", "/api/terminaux/**", "/api/quais/**", "/api/lignes/**", "/api/abonnements/**" ).hasAnyAuthority("ROLE_ADMIN", "ROLE_RESPONSABLE")
+                        .requestMatchers("/api/audit/**").hasAuthority("ROLE_ADMIN")
 
                         // Tout le reste nécessite au moins d'être connecté
                         .anyRequest().authenticated()

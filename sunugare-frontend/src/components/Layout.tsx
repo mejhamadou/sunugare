@@ -39,6 +39,7 @@ export default function Layout() {
                             <Link to="/infrastructures" className={`nav-item ${location.pathname === '/infrastructures' ? 'active' : ''}`}>🏗️ Infrastructures</Link>
                             <Link to="/utilisateurs" className={`nav-item ${location.pathname === '/utilisateurs' ? 'active' : ''}`}>👥 Utilisateurs</Link>
                             <Link to="/admin" className={`nav-item ${location.pathname === '/admin' ? 'active' : ''}`}>🏢 Administration</Link>
+                            <Link to="/audit" className={`nav-item ${location.pathname === '/audit' ? 'active' : ''}`}>📜 Journal d'audit</Link>
                         </>
                     )}
                 </nav>
