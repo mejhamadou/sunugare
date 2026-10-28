@@ -130,7 +130,7 @@ export default function Chauffeurs() {
                         <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                             <button type="submit" style={{ flex: 1 }}>{editingId ? 'Enregistrer' : 'Ajouter'}</button>
                             {editingId && (
-                                <button type="button" className="btn-danger" onClick={() => { setEditingId(null); setFormData({ nom: '', prenom: '', telephone: '', numeroPermis: '', compagnieId: '', dateExpirationPermis: '' }); }} style={{ flex: 1 }}>
+                                <button type="button" className="btn-danger" onClick={() => { setEditingId(null); setFormData({ nom: '', prenom: '', telephone: '', numeroPermis: '', compagnieId: '', dateExpirationPermis: '', numeroBadge:'' }); }} style={{ flex: 1 }}>
                                     Annuler
                                 </button>
                             )}
