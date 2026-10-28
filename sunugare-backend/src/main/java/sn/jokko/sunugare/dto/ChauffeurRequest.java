@@ -23,6 +23,8 @@ public class ChauffeurRequest {
     private java.time.LocalDate dateExpirationPermis;
     private Boolean conformiteValideeManuellement = false;
 
+    private String numeroBadge;
+
     // Getters et Setters...
     public String getPrenom() { return prenom; }
     public void setPrenom(String prenom) { this.prenom = prenom; }
@@ -36,4 +38,6 @@ public class ChauffeurRequest {
     public void setCompagnieId(Long compagnieId) { this.compagnieId = compagnieId; }
     public LocalDate getDateExpirationPermis() {return dateExpirationPermis;}
     public void setDateExpirationPermis(LocalDate dateExpirationPermis) {this.dateExpirationPermis = dateExpirationPermis;}
+    public String getNumeroBadge() { return numeroBadge; }
+    public void setNumeroBadge(String numeroBadge) { this.numeroBadge = numeroBadge; }
 }

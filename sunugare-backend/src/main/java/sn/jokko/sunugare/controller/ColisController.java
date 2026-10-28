@@ -39,6 +39,21 @@ public class ColisController {
         }
     }
 
+    @GetMapping("/recherche")
+    public ResponseEntity<List<Colis>> rechercher(@RequestParam(required = false) String statut) {
+        return ResponseEntity.ok(service.rechercher(statut));
+    }
+
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> exporterCsv() {
+        List<Colis> colis = service.getAll();
+        String csvData = service.exporterCsv(colis);
+        return ResponseEntity.ok()
+                .header("Content-Type", "text/csv; charset=UTF-8")
+                .header("Content-Disposition", "attachment; filename=colis.csv")
+                .body(csvData.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    }
+
     @PatchMapping("/{id}/statut")
     public ResponseEntity<Colis> changerStatut(@PathVariable Long id, @RequestParam String statut) {
         return ResponseEntity.ok(service.changerStatut(id, statut));

@@ -6,7 +6,7 @@ export default function Chauffeurs() {
     const [compagnies, setCompagnies] = useState<any[]>([]);
 
     const [formData, setFormData] = useState({
-        nom: '', prenom: '', telephone: '', numeroPermis: '', compagnieId: '', dateExpirationPermis: ''
+        nom: '', prenom: '', telephone: '', numeroPermis: '', compagnieId: '', dateExpirationPermis: '', numeroBadge: ''
     });
 
     const [editingId, setEditingId] = useState<number | null>(null);
@@ -30,7 +30,8 @@ export default function Chauffeurs() {
                 telephone: formData.telephone,
                 numeroPermis: formData.numeroPermis,
                 compagnieId: Number(formData.compagnieId),
-                dateExpirationPermis: formData.dateExpirationPermis ? formData.dateExpirationPermis : null
+                dateExpirationPermis: formData.dateExpirationPermis ? formData.dateExpirationPermis : null,
+                numeroBadge: formData.numeroBadge
             };
 
             if (editingId) {
@@ -40,7 +41,7 @@ export default function Chauffeurs() {
                 await api.createChauffeur(dataToSend);
             }
 
-            setFormData({ nom: '', prenom: '', telephone: '', numeroPermis: '', compagnieId: '', dateExpirationPermis: '' });
+            setFormData({ nom: '', prenom: '', telephone: '', numeroPermis: '', compagnieId: '', dateExpirationPermis: '', numeroBadge: '' });
             loadData();
         } catch (err) {
             alert("Erreur lors de l'enregistrement");
@@ -55,8 +56,27 @@ export default function Chauffeurs() {
             telephone: c.telephone || '',
             numeroPermis: c.numeroPermis || '',
             compagnieId: c.compagnie.id.toString(),
-            dateExpirationPermis: c.dateExpirationPermis || ''
+            dateExpirationPermis: c.dateExpirationPermis || '',
+            numeroBadge: c.numeroBadge || ''
+
         });
+    };
+
+    const [filtreCompagnie, setFiltreCompagnie] = useState('');
+
+    const handleRecherche = async () => {
+        // ✅ On utilise compagnieId, comme dans le backend
+        const url = filtreCompagnie ? `/api/chauffeurs/recherche?compagnieId=${filtreCompagnie}` : '/api/chauffeurs';
+        const res = await fetch(url, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+        const data = await res.json();
+        setChauffeurs(data);
+    };
+
+    const handleExportCsv = async () => {
+        const res = await fetch('/api/chauffeurs/export', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'chauffeurs.csv'; a.click();
     };
 
     const getBadgeConformite = (dateExpiration: string | null) => {
@@ -93,6 +113,14 @@ export default function Chauffeurs() {
                         <label>Expiration du permis</label>
                         <input type="date" value={formData.dateExpirationPermis} onChange={(e) => setFormData({...formData, dateExpirationPermis: e.target.value})} />
 
+                        <label>Numéro de badge (RFID)</label>
+                        <input
+                            type="text"
+                            placeholder="Ex: BADGE-123"
+                            value={formData.numeroBadge}
+                            onChange={(e) => setFormData({...formData, numeroBadge: e.target.value})}
+                        />
+
                         <label>Compagnie</label>
                         <select value={formData.compagnieId} onChange={(e) => setFormData({...formData, compagnieId: e.target.value})} required>
                             <option value="">Sélectionner une compagnie</option>
@@ -112,13 +140,22 @@ export default function Chauffeurs() {
 
                 <div className="card">
                     <h3>Liste des conducteurs ({chauffeurs.length})</h3>
+                    <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+                        <select value={filtreCompagnie} onChange={(e) => setFiltreCompagnie(e.target.value)} style={{ flex: 1 }}>
+                            <option value="">Toutes les compagnies</option>
+                            {/* ✅ On affiche les compagnies au lieu des chauffeurs */}
+                            {compagnies.map(c => <option key={c.id} value={c.id}>{c.nom}</option>)}
+                        </select>
+                        <button onClick={handleRecherche}>Filtrer</button>
+                        <button onClick={handleExportCsv} style={{ backgroundColor: '#10B981' }}>📥 Exporter CSV</button>
+                    </div>
                     <ul>
                         {chauffeurs.map(c => (
                             <li key={c.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <div>
                                         <strong>{c.prenom} {c.nom}</strong>
-                                        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{c.compagnie.nom} | Permis: {c.numeroPermis}</div>
+                                        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{c.compagnie.nom} | Permis: {c.numeroPermis} {c.numeroBadge && <span style={{ color: 'var(--primary)' }}> | Badge: {c.numeroBadge}</span>} </div>
                                     </div>
                                     <div>{getBadgeConformite(c.dateExpirationPermis)}</div>
                                 </div>

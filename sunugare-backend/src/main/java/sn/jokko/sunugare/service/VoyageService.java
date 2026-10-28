@@ -127,6 +127,12 @@ public class VoyageService {
         return voyageMisAJour;
     }
 
+    public List<Voyage> getVoyagesLive() {
+        // On garde les voyages arrivés pendant les 5 dernières minutes
+        java.time.LocalDateTime limite = java.time.LocalDateTime.now().minusMinutes(5);
+        return voyageRepo.findVoyagesPourDashboard(limite);
+    }
+
     public List<Voyage> getAllVoyagesPourUtilisateur(String email) {
         User user = userRepository.findByEmail(email).orElseThrow();
 
@@ -176,6 +182,42 @@ public class VoyageService {
                     .append(v.getStatut()).append("\n");
         }
         return csv.toString();
+    }
+ // Sytème Badge
+
+    public Voyage scannerBadge(String numeroBadge, String typeScan) {
+        // 1. On trouve le chauffeur par son badge
+        Chauffeur chauffeur = chauffeurRepo.findAll().stream()
+                .filter(c -> numeroBadge.equals(c.getNumeroBadge()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Badge non reconnu"));
+
+        // 2. On trouve le voyage en cours de ce chauffeur
+        // (le voyage le plus récent qui n'est pas encore terminé)
+        Voyage voyage = voyageRepo.findAll().stream()
+                .filter(v -> v.getChauffeur().getId().equals(chauffeur.getId()))
+                .filter(v -> !v.getStatut().equals("ARRIVE") && !v.getStatut().equals("ANNULE"))
+                .max(java.util.Comparator.comparing(Voyage::getDateDepart))
+                .orElseThrow(() -> new RuntimeException("Aucun voyage actif trouvé pour ce chauffeur"));
+
+        // 3. La magie du badgeage
+        if (typeScan.equals("SORTIE")) {
+            if (!voyage.getStatut().equals("EMBARQUEMENT")) {
+                throw new RuntimeException("Le bus doit être en embarquement pour quitter la gare.");
+            }
+            voyage.setStatut("DEPART");
+        }
+        else if (typeScan.equals("ENTREE")) {
+            if (!voyage.getStatut().equals("DEPART")) {
+                throw new RuntimeException("Le bus doit être en route pour arriver.");
+            }
+            voyage.setStatut("ARRIVE");
+
+            // ✅ On déclenche l'envoi des avis WhatsApp (qu'on a fait à l'étape précédente)
+            avisService.demanderAvisPourVoyage(voyage.getId());
+        }
+
+        return voyageRepo.save(voyage);
     }
 
 }

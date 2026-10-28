@@ -64,6 +64,22 @@ export default function Vehicules() {
         });
     };
 
+    const [filtreCompagnie, setFiltreCompagnie] = useState('');
+
+    const handleRecherche = async () => {
+        const url = filtreCompagnie ? `/api/vehicules/recherche?compagnieId=${filtreCompagnie}` : '/api/vehicules';
+        const res = await fetch(url, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+        const data = await res.json();
+        setVehicules(data);
+    };
+
+    const handleExportCsv = async () => {
+        const res = await fetch('/api/vehicules/export', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'vehicules.csv'; a.click();
+    };
+
     // ✅ Fonction pour générer les badges d'alerte
     const getBadgeConformite = (dateExpiration: string | null) => {
         if (!dateExpiration) return <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Non renseigné</span>;
@@ -124,6 +140,14 @@ export default function Vehicules() {
 
                 <div className="card">
                     <h3>Flotte de véhicules ({vehicules.length})</h3>
+                    <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+                        <select value={filtreCompagnie} onChange={(e) => setFiltreCompagnie(e.target.value)} style={{ flex: 1 }}>
+                            <option value="">Toutes les compagnies</option>
+                            {compagnies.map(c => <option key={c.id} value={c.id}>{c.nom}</option>)}
+                        </select>
+                        <button onClick={handleRecherche}>Filtrer</button>
+                        <button onClick={handleExportCsv} style={{ backgroundColor: '#10B981' }}>📥 Exporter CSV</button>
+                    </div>
                     <ul>
                         {vehicules.map(v => (
                             <li key={v.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>

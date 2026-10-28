@@ -24,6 +24,9 @@ public class Chauffeur {
     @JoinColumn(name = "compagnie_id", nullable = false)
     private Compagnie compagnie;
 
+    private String NumeroBadge;
+
+
     private java.time.LocalDate dateExpirationPermis;
     private Boolean conformiteValideeManuellement = false;
 
@@ -48,4 +51,7 @@ public class Chauffeur {
 
     public Boolean getConformiteValideeManuellement() { return conformiteValideeManuellement; }
     public void setConformiteValideeManuellement(Boolean conformiteValideeManuellement) { this.conformiteValideeManuellement = conformiteValideeManuellement; }
+
+    public String getNumeroBadge() {return NumeroBadge;}
+    public void setNumeroBadge(String NumeroBadge) { this.NumeroBadge = NumeroBadge; }
 }

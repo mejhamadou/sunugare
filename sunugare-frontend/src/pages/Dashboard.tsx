@@ -3,159 +3,115 @@ import { api } from '../services/api';
 
 export default function Dashboard() {
     const [stats, setStats] = useState<any>(null);
-    const [prediction, setPrediction] = useState<any>(null);
-    const [periode, setPeriode] = useState<'jour' | 'semaine' | 'mois' | 'tout'>('tout');
+    const [voyagesLive, setVoyagesLive] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const loadStats = async () => {
-        let debut = undefined;
-        let fin = undefined;
-        const aujourdhui = new Date();
-
-        if (periode === 'jour') {
-            debut = aujourdhui.toISOString().split('T')[0];
-            fin = debut;
-        } else if (periode === 'semaine') {
-            const ilYa7Jours = new Date();
-            ilYa7Jours.setDate(aujourdhui.getDate() - 7);
-            debut = ilYa7Jours.toISOString().split('T')[0];
-            fin = aujourdhui.toISOString().split('T')[0];
-        } else if (periode === 'mois') {
-            const ilYa30Jours = new Date();
-            ilYa30Jours.setDate(aujourdhui.getDate() - 30);
-            debut = ilYa30Jours.toISOString().split('T')[0];
-            fin = aujourdhui.toISOString().split('T')[0];
+    const loadLiveData = async () => {
+        try {
+            // On charge les stats et les voyages en parallèle
+            const [statsData, liveData] = await Promise.all([
+                api.getDashboardStats(),
+                api.getVoyagesLive()
+            ]);
+            setStats(statsData);
+            setVoyagesLive(liveData || []);
+        } catch (err) {
+            console.error("Erreur de chargement du dashboard", err);
+        } finally {
+            setLoading(false); // ✅ On arrête le chargement dans tous les cas
         }
-
-        const data = await api.getDashboardStats(debut, fin);
-        setStats(data);
     };
 
     useEffect(() => {
-        loadStats();
-        api.getPrediction().then(setPrediction).catch(console.error);
-    }, [periode]);
+        loadLiveData();
+        // Rafraîchissement automatique toutes les 30 secondes
+        const interval = setInterval(loadLiveData, 30000);
+        return () => clearInterval(interval);
+    }, []);
 
-    if (!stats || !prediction) return <p>Chargement des données...</p>;
+    if (loading) return <p style={{ padding: '20px' }}>Chargement des données en temps réel...</p>;
 
-    const handleExportRapport = async () => {
-        // On calcule les dates selon la période sélectionnée (même logique que loadStats)
-        let debut = '';
-        let fin = '';
-        const aujourdhui = new Date();
-
-        if (periode === 'jour') {
-            debut = aujourdhui.toISOString().split('T')[0];
-            fin = debut;
-        } else if (periode === 'semaine') {
-            const ilYa7Jours = new Date();
-            ilYa7Jours.setDate(aujourdhui.getDate() - 7);
-            debut = ilYa7Jours.toISOString().split('T')[0];
-            fin = aujourdhui.toISOString().split('T')[0];
-        } else if (periode === 'mois') {
-            const ilYa30Jours = new Date();
-            ilYa30Jours.setDate(aujourdhui.getDate() - 30);
-            debut = ilYa30Jours.toISOString().split('T')[0];
-            fin = aujourdhui.toISOString().split('T')[0];
-        }
-
-        try {
-            const response = await fetch(`/api/dashboard/export-csv?dateDebut=${debut}&dateFin=${fin}`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-            });
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'rapport_sunugare.csv';
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-        } catch (err) {
-            alert("Erreur lors du téléchargement du rapport");
-        }
-    };
+    // Si les stats n'ont pas pu être chargées du tout
+    if (!stats) return <p style={{ padding: '20px', color: 'red' }}>Impossible de charger les statistiques. Vérifiez la console.</p>;
 
     return (
         <div>
-            <h1 style={{ marginBottom: '30px' }}>Tableau de bord</h1>
+            <h1 style={{ marginBottom: '20px' }}>Tableau de bord Live</h1>
 
-            {/* ✅ BOUTONS DE PÉRIODE ET EXPORT */}
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                <button onClick={handleExportRapport} style={{ backgroundColor: '#10B981', padding: '8px 15px', fontSize: '13px' }}>
-                    📥 Exporter le rapport
-                </button>
-
-                <div style={{ display: 'flex', gap: '5px', backgroundColor: '#fff', padding: '5px', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                <button onClick={() => setPeriode('jour')} style={{ padding: '6px 12px', fontSize: '13px', backgroundColor: periode === 'jour' ? 'var(--primary)' : 'transparent', color: periode === 'jour' ? 'white' : 'var(--text-main)' }}>Aujourd'hui</button>
-                <button onClick={() => setPeriode('semaine')} style={{ padding: '6px 12px', fontSize: '13px', backgroundColor: periode === 'semaine' ? 'var(--primary)' : 'transparent', color: periode === 'semaine' ? 'white' : 'var(--text-main)' }}>7 jours</button>
-                <button onClick={() => setPeriode('mois')} style={{ padding: '6px 12px', fontSize: '13px', backgroundColor: periode === 'mois' ? 'var(--primary)' : 'transparent', color: periode === 'mois' ? 'white' : 'var(--text-main)' }}>30 jours</button>
-                <button onClick={() => setPeriode('tout')} style={{ padding: '6px 12px', fontSize: '13px', backgroundColor: periode === 'tout' ? 'var(--primary)' : 'transparent', color: periode === 'tout' ? 'white' : 'var(--text-main)' }}>Tout</button>
-            </div>
-            </div>
-
-            {/* GRILLE DE CARTES KPI */}
-            <div className="grid-cards" style={{ gridTemplateColumns: 'repeat(2, 1fr)', marginBottom: '20px' }}>
-
-                {/* CARTE 1 : RECETTES TOTALES */}
+            {/* GRILLE KPI */}
+            <div className="grid-cards" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: '30px' }}>
                 <div className="card" style={{ borderLeft: '4px solid #10B981' }}>
-                    <h3 style={{ color: 'var(--text-muted)', fontSize: '14px', textTransform: 'uppercase' }}>Recettes Totales</h3>
-                    <p style={{ fontSize: '36px', fontWeight: 'bold', marginTop: '10px' }}>
-                        {stats.recettes.toLocaleString('fr-FR')} <span style={{ fontSize: '18px' }}>FCFA</span>
-                    </p>
+                    <h3 style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Recettes Totales</h3>
+                    <p style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.recettes ? stats.recettes.toLocaleString('fr-FR') : 0} FCFA</p>
                 </div>
-
-                {/* CARTE 2 : BILLETS VENDUS */}
                 <div className="card" style={{ borderLeft: '4px solid #3B82F6' }}>
-                    <h3 style={{ color: 'var(--text-muted)', fontSize: '14px', textTransform: 'uppercase' }}>Billets Vendus</h3>
-                    <p style={{ fontSize: '36px', fontWeight: 'bold', marginTop: '10px' }}>
-                        {stats.totalBillets}
-                    </p>
+                    <h3 style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Billets Vendus</h3>
+                    <p style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.totalBillets || 0}</p>
                 </div>
-            </div>
-
-            {/* DÉTAIL DES PAIEMENTS */}
-            <div className="grid-cards" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
-                <div className="card">
-                    <h3 style={{ fontSize: '14px', color: 'var(--text-muted)' }}>💵 Espèces</h3>
-                    <p style={{ fontSize: '24px', fontWeight: 'bold', marginTop: '10px' }}>{stats.recettesEspeces.toLocaleString('fr-FR')} FCFA</p>
-                </div>
-                <div className="card">
-                    <h3 style={{ fontSize: '14px', color: 'var(--text-muted)' }}>💙 Wave</h3>
-                    <p style={{ fontSize: '24px', fontWeight: 'bold', marginTop: '10px' }}>{stats.recettesWave.toLocaleString('fr-FR')} FCFA</p>
-                </div>
-                <div className="card">
-                    <h3 style={{ fontSize: '14px', color: 'var(--text-muted)' }}>🧡 Orange Money</h3>
-                    <p style={{ fontSize: '24px', fontWeight: 'bold', marginTop: '10px' }}>{stats.recettesOm.toLocaleString('fr-FR')} FCFA</p>
-                </div>
-            </div>
-
-                {/* CARTE 3 : VOYAGES A VENIR */}
                 <div className="card" style={{ borderLeft: '4px solid #F59E0B' }}>
-                    <h3 style={{ color: 'var(--text-muted)', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                        Voyages Planifiés
-                    </h3>
-                    <p style={{ fontSize: '36px', fontWeight: 'bold', color: 'var(--text-main)', marginTop: '10px' }}>
-                        {stats.voyagesPlanifies}
-                    </p>
+                    <h3 style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Voyages Planifiés</h3>
+                    <p style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.voyagesPlanifies || 0}</p>
                 </div>
-
-            {/* CARTE IA */}
-            <div className="card" style={{ marginTop: '20px', borderLeft: '4px solid #8B5CF6', backgroundColor: '#F5F3FF' }}>
-                <h3 style={{ color: '#6D28D9', fontSize: '16px', marginBottom: '10px' }}>🤖 Prédiction IA (Affluence)</h3>
-                <p style={{ fontSize: '14px' }}>
-                    Selon l'historique (<em>{prediction.tendance}</em>), nous prévoyons environ <strong>{prediction.predictionBilletsDemain}</strong> billets vendus demain.
-                </p>
+                <div className="card" style={{ borderLeft: '4px solid #8B5CF6' }}>
+                    <h3 style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Recettes Wave</h3>
+                    <p style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.recettesWave ? stats.recettesWave.toLocaleString('fr-FR') : 0} FCFA</p>
+                </div>
             </div>
 
-            {/* SECTION D'INFORMATION */}
-            <div className="card" style={{ marginTop: '30px' }}>
-                <h3>Bienvenue sur votre espace de supervision</h3>
-                <p style={{ color: 'var(--text-muted)', marginTop: '10px', lineHeight: '1.6' }}>
-                    Utilisez le menu de gauche pour naviguer entre les différents modules.
-                    Vous pouvez planifier de nouveaux voyages, gérer votre flotte, et vendre des billets
-                    pour les passagers.
-                </p>
+            {/* PLANNING DYNAMIQUE */}
+            <div className="card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                    <h3>🟢 Supervision des départs (Temps réel)</h3>
+                    <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Mise à jour auto (30s)</span>
+                </div>
+
+                {voyagesLive.length === 0 ? (
+                    <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '20px' }}>Aucun voyage en cours pour le moment.</p>
+                ) : (
+                    <ul>
+                        {voyagesLive.map(v => {
+                            const isArrive = v.statut === 'ARRIVE';
+                            const isDepart = v.statut === 'DEPART';
+
+                            return (
+                                <li key={v.id} style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    padding: '15px',
+                                    borderLeft: `4px solid ${isArrive ? '#10B981' : (isDepart ? '#F59E0B' : '#3B82F6')}`,
+                                    opacity: isArrive ? 0.5 : 1,
+                                    transition: 'opacity 1s ease'
+                                }}>
+                                    <div>
+                                        <h4 style={{ margin: 0, fontSize: '16px' }}>
+                                            {v.ligne?.villeDepart?.nom} ➔ {v.ligne?.villeArrivee?.nom}
+                                        </h4>
+                                        <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                                            Départ : {new Date(v.dateDepart).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} | Quai: {v.quai?.numero} | Bus: {v.vehicule?.immatriculation}
+                                        </div>
+                                    </div>
+
+                                    <div style={{ textAlign: 'right' }}>
+                    <span style={{
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        padding: '5px 12px',
+                        borderRadius: '12px',
+                        backgroundColor: isArrive ? '#D1FAE5' : (isDepart ? '#FEF3C7' : '#DBEAFE'),
+                        color: isArrive ? '#059669' : (isDepart ? '#D97706' : '#1E40AF')
+                    }}>
+                      {v.statut === 'PLANIFIE' ? '📅 Planifié' :
+                          v.statut === 'EMBARQUEMENT' ? '👥 Embarquement' :
+                              v.statut === 'DEPART' ? '🚌 En route' :
+                                  '✅ Arrivé'}
+                    </span>
+                                    </div>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                )}
             </div>
         </div>
     );

@@ -8,7 +8,7 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:8082',
+        target: 'http://127.0.0.1:8082', // ✅ On force l'IPv4 ici
         changeOrigin: true,
       },
     },

@@ -1,0 +1,1 @@
+ALTER TABLE chauffeurs ADD COLUMN numero_badge VARCHAR(50) UNIQUE;

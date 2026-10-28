@@ -30,6 +30,8 @@ public class ChauffeurService {
         v.setTelephone(request.getTelephone());
         v.setNumeroPermis(request.getNumeroPermis());
         v.setCompagnie(compagnie);
+        v.setNumeroBadge(request.getNumeroBadge());
+
         return chauffeurRepository.save(v);
     }
 
@@ -45,6 +47,7 @@ public class ChauffeurService {
         chauffeur.setTelephone(request.getTelephone());
         chauffeur.setNumeroPermis(request.getNumeroPermis());
         chauffeur.setCompagnie(compagnie);
+        chauffeur.setNumeroBadge(request.getNumeroBadge());
 
         // ✅ On enregistre la date d'expiration du permis
         chauffeur.setDateExpirationPermis(request.getDateExpirationPermis());
@@ -54,5 +57,22 @@ public class ChauffeurService {
 
     public List<Chauffeur> getAll() {
         return chauffeurRepository.findAll();
+    }
+
+    public List<Chauffeur> rechercher(Long compagnieId) {
+        return chauffeurRepository.rechercherChauffeurs(compagnieId);
+    }
+
+    public String exporterCsv(List<Chauffeur> chauffeurs) {
+        StringBuilder csv = new StringBuilder("Nom;Prenom;Telephone;Permis;Badge;Compagnie\n");
+        for (Chauffeur c : chauffeurs) {
+            csv.append(c.getNom()).append(";")
+                    .append(c.getPrenom()).append(";")
+                    .append(c.getTelephone()).append(";")
+                    .append(c.getNumeroPermis()).append(";")
+                    .append(c.getNumeroBadge() != null ? c.getNumeroBadge() : "").append(";")
+                    .append(c.getCompagnie().getNom()).append("\n");
+        }
+        return csv.toString();
     }
 }

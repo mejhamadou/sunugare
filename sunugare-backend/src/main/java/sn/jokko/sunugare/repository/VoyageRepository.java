@@ -31,4 +31,8 @@ public interface VoyageRepository extends JpaRepository<Voyage, Long> {
     @Query("SELECT v.quai.numero, COUNT(v) FROM Voyage v WHERE CAST(v.dateDepart AS date) = CURRENT_DATE GROUP BY v.quai.numero")
     List<Object[]> countVoyagesParQuaiAujourdhui();
 
+    @Query("SELECT v FROM Voyage v WHERE v.statut IN ('PLANIFIE', 'EMBARQUEMENT', 'DEPART') " +
+            "OR (v.statut = 'ARRIVE' AND v.dateDepart >= :limiteArrivee) " +
+            "ORDER BY v.dateDepart ASC")
+    List<Voyage> findVoyagesPourDashboard(@Param("limiteArrivee") java.time.LocalDateTime limiteArrivee);
 }

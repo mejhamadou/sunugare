@@ -18,6 +18,7 @@ import Intelligence from "./pages/Intelligence.tsx";
 import Colis from './pages/Colis';
 import SuiviColis from './pages/SuiviColis';
 import LaisserAvis from "./pages/LaisserAvis.tsx";
+import Badgeage from "./pages/Badgeage.tsx";
 
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
                 <Route path="/reserver" element={<ReservationPublique />} />
                 <Route path="/suivi-colis" element={<SuiviColis />} />
                 <Route path="/avis/:billetId" element={<LaisserAvis />} />
+                <Route path="/badgeage" element={<Badgeage />} />
 
                 {/* Routes protégées enveloppées dans le Layout */}
                 <Route element={<Layout />}>
@@ -46,6 +48,7 @@ function App() {
                     <Route path="/audit" element={<JournalAudit />} />
                     <Route path="/intelligence" element={<Intelligence />} />
                     <Route path="/colis" element={<Colis />} />
+                    <Route path="/badgeage" element={<Badgeage />} />
                 </Route>
             </Routes>
         </BrowserRouter>

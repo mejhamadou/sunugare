@@ -22,6 +22,22 @@ public class VehiculeController {
     public ResponseEntity<Vehicule> creer(@Valid @RequestBody VehiculeRequest request) {
         return ResponseEntity.ok(service.creerVehicule(request));
     }
+
+    @GetMapping("/recherche")
+    public ResponseEntity<List<Vehicule>> rechercher(@RequestParam(required = false) Long compagnieId) {
+        return ResponseEntity.ok(service.rechercher(compagnieId));
+    }
+
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> exporterCsv() {
+        List<Vehicule> vehicules = service.getAll(); // ou la recherche
+        String csvData = service.exporterCsv(vehicules);
+        return ResponseEntity.ok()
+                .header("Content-Type", "text/csv; charset=UTF-8")
+                .header("Content-Disposition", "attachment; filename=vehicules.csv")
+                .body(csvData.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    }
+    
     @PutMapping("/{id}")
     public ResponseEntity<Vehicule> modifier(@PathVariable Long id, @Valid @RequestBody VehiculeRequest request) {
         return ResponseEntity.ok(service.updateVehicule(id, request));

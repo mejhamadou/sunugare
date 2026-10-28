@@ -20,4 +20,21 @@ public class AuditController {
     public ResponseEntity<List<AuditLog>> getAll() {
         return ResponseEntity.ok(service.getAllLogs());
     }
+
+    @GetMapping("/recherche")
+    public ResponseEntity<List<AuditLog>> rechercher(
+            @RequestParam(required = false) String action,
+            @RequestParam(required = false) String email) {
+        return ResponseEntity.ok(service.rechercher(action, email));
+    }
+
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> exporterCsv() {
+        List<AuditLog> logs = service.getAllLogs();
+        String csvData = service.exporterCsv(logs);
+        return ResponseEntity.ok()
+                .header("Content-Type", "text/csv; charset=UTF-8")
+                .header("Content-Disposition", "attachment; filename=journal_audit.csv")
+                .body(csvData.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    }
 }

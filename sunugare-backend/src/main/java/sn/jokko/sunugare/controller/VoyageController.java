@@ -10,6 +10,7 @@ import sn.jokko.sunugare.service.VoyageService;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/voyages")
@@ -23,6 +24,11 @@ public class VoyageController {
     @GetMapping("/public/disponibles")
     public ResponseEntity<List<Voyage>> getVoyagesPublics() {
         return ResponseEntity.ok(service.getVoyagesPourPublic());
+    }
+
+    @GetMapping("/live")
+    public ResponseEntity<List<Voyage>> getVoyagesLive() {
+        return ResponseEntity.ok(service.getVoyagesLive());
     }
 
     @GetMapping("/recherche")
@@ -53,11 +59,9 @@ public class VoyageController {
 
     @GetMapping
     public ResponseEntity<List<Voyage>> getAll(java.security.Principal principal) {
-        // principal.getName() renvoie l'email de l'utilisateur connecté
+        // Le principal doit bien être récupéré
         return ResponseEntity.ok(service.getAllVoyagesPourUtilisateur(principal.getName()));
     }
-
-
 
     @PatchMapping("/{id}/statut")
     public ResponseEntity<Voyage> changerStatut(@PathVariable Long id, @RequestParam String statut) {
@@ -69,6 +73,17 @@ public class VoyageController {
         return ResponseEntity.ok(service.signalerRetard(id, minutes));
     }
 
+    @PostMapping("/scanner-badge")
+    public ResponseEntity<?> scannerBadge(@RequestBody Map<String, String> request) {
+        try {
+            String badge = request.get("numeroBadge");
+            String type = request.get("typeScan"); // "SORTIE" ou "ENTREE"
 
+            Voyage voyage = service.scannerBadge(badge, type);
+            return ResponseEntity.ok(voyage);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 
 }

@@ -54,6 +54,22 @@ export default function Colis() {
         }
     };
 
+    const [filtreStatut, setFiltreStatut] = useState('');
+
+    const handleRecherche = async () => {
+        const url = filtreStatut ? `/api/colis/recherche?statut=${filtreStatut}` : '/api/colis';
+        const res = await fetch(url, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+        const data = await res.json();
+        setColis(data);
+    };
+
+    const handleExportCsv = async () => {
+        const res = await fetch('/api/colis/export', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'colis.csv'; a.click();
+    };
+
     return (
         <div>
             <h1 style={{ marginBottom: '20px' }}>Gestion des Colis</h1>
@@ -102,6 +118,18 @@ export default function Colis() {
                 {/* LISTE DES COLIS */}
                 <div className="card">
                     <h3>Colis enregistrés ({colis.length})</h3>
+                    <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+                        <select value={filtreStatut} onChange={(e) => setFiltreStatut(e.target.value)} style={{ flex: 1 }}>
+                            <option value="">Tous les statuts</option>
+                            <option value="EN_ATTENTE">En attente</option>
+                            <option value="EN_TRANSIT">En transit</option>
+                            <option value="ARRIVE">Arrivé</option>
+                            <option value="LIVRE">Livré</option>
+                        </select>
+                        <button onClick={handleRecherche}>Filtrer</button>
+                        <button onClick={handleExportCsv} style={{ backgroundColor: '#10B981' }}>📥 Exporter CSV</button>
+                    </div>
+
                     <ul>
                         {colis.map(c => {
                             const colors = getStatutColor(c.statut);

@@ -1,4 +1,4 @@
-const API_URL = '/api';
+const API_URL = 'http://127.0.0.1:8082/api';
 
 // Petit raccourci pour récupérer le token
 const getToken = () => localStorage.getItem('token');
@@ -471,4 +471,23 @@ export const api = {
         return response.json();
     },
 
+    getVoyagesLive: async () => {
+        const response = await fetch(`${API_URL}/voyages/live`, {
+            headers: { 'Authorization': `Bearer ${getToken()}` },
+        });
+        return response.ok ? response.json() : [];
+    },
+
+    scannerBadge: async (numeroBadge: string, typeScan: string) => {
+        const response = await fetch(`${API_URL}/voyages/scanner-badge`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+            body: JSON.stringify({ numeroBadge, typeScan }),
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Erreur de scan');
+        }
+        return response.json();
+    }
 };

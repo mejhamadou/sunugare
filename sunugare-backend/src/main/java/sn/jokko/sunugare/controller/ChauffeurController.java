@@ -25,6 +25,21 @@ public class ChauffeurController {
         return ResponseEntity.ok(service.creerChauffeur(request));
     }
 
+    @GetMapping("/recherche")
+    public ResponseEntity<List<Chauffeur>> rechercher(@RequestParam(required = false) Long compagnieId) {
+        return ResponseEntity.ok(service.rechercher(compagnieId));
+    }
+
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> exporterCsv() {
+        List<Chauffeur> chauffeurs = service.getAll();
+        String csvData = service.exporterCsv(chauffeurs);
+        return ResponseEntity.ok()
+                .header("Content-Type", "text/csv; charset=UTF-8")
+                .header("Content-Disposition", "attachment; filename=chauffeurs.csv")
+                .body(csvData.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<Chauffeur> modifier(@PathVariable Long id, @Valid @RequestBody ChauffeurRequest request) {
         return ResponseEntity.ok(service.updateChauffeur(id, request));

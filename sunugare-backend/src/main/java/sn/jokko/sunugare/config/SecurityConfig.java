@@ -30,36 +30,35 @@ public class SecurityConfig {
     }
 
     @Bean
+    public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
+        org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
+        configuration.setAllowedOrigins(java.util.List.of("http://localhost:3020", "http://127.0.0.1:3020"));
+        configuration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(java.util.List.of("*"));
+        configuration.setAllowCredentials(true);
+
+        org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(org.springframework.security.config.Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // 1. ROUTES PUBLIQUES (Sans authentification)
-                        .requestMatchers("/api/auth/**", "/api/health", "/actuator/**").permitAll()
+                        // 1. TOUT CE QUI EST PUBLIC (Sans token)
+                        .requestMatchers("/api/auth/**", "/api/health", "/actuator/**", "/error").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/voyages/public/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/billets/public/reserver").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/billets/*/qrcode", "/api/billets/*/pdf").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/colis/suivi/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/avis/billet/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/avis").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/colis/suivi/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/voyages/live").permitAll() // ✅ Ligne ajoutée
 
-                        // 2. ✅ LA ROUTE DE RECHERCHE (Priorité absolue)
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/billets/recherche-filtres").hasAnyAuthority("ROLE_ADMIN", "ROLE_AGENT", "ROLE_RESPONSABLE")
-
-                        // 3. AUTRES ROUTES BILLETS (Export, GetAll, Valider, Annuler)
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/billets", "/api/billets/export").hasAnyAuthority("ROLE_ADMIN", "ROLE_AGENT", "ROLE_RESPONSABLE")
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/billets", "/api/billets/valider", "/api/bagages/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_AGENT", "ROLE_RESPONSABLE")
-                        .requestMatchers(org.springframework.http.HttpMethod.PATCH, "/api/billets/*/annuler").hasAnyAuthority("ROLE_ADMIN", "ROLE_AGENT", "ROLE_RESPONSABLE")
-
-                        // 4. ROUTES ADMINISTRATION
-                        .requestMatchers("/api/utilisateurs/**", "/api/vehicules/**", "/api/chauffeurs/**", "/api/terminaux/**", "/api/audit/**", "/api/abonnements/**", "/api/dashboard/export-csv").hasAnyAuthority("ROLE_ADMIN", "ROLE_RESPONSABLE")
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/voyages", "/api/lignes/**", "/api/quais/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_RESPONSABLE")
-                        .requestMatchers(org.springframework.http.HttpMethod.PATCH, "/api/voyages/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_RESPONSABLE")
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/voyages", "/api/planning").hasAnyAuthority("ROLE_ADMIN", "ROLE_AGENT", "ROLE_RESPONSABLE")
-                        .requestMatchers("/api/ia/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_RESPONSABLE")
-
-                        // 5. TOUT LE RESTE
+                        // 2. TOUT LE RESTE NÉCESSITE D'ÊTRE CONNECTÉ
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

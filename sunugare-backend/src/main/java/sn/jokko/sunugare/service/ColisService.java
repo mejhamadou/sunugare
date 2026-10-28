@@ -53,4 +53,21 @@ public class ColisService {
         colis.setStatut(nouveauStatut);
         return colisRepository.save(colis);
     }
+
+    public List<Colis> rechercher(String statut) {
+        return colisRepository.rechercherColis((statut != null && !statut.isEmpty()) ? statut : null);
+    }
+
+    public String exporterCsv(List<Colis> colisList) {
+        StringBuilder csv = new StringBuilder("Code;Expediteur;Destinataire;Description;Prix;Statut\n");
+        for (Colis c : colisList) {
+            csv.append(c.getCodeSuivi()).append(";")
+                    .append(c.getExpediteurNom()).append(";")
+                    .append(c.getDestinataireNom()).append(";")
+                    .append(c.getDescription()).append(";")
+                    .append(c.getPrix()).append(";")
+                    .append(c.getStatut()).append("\n");
+        }
+        return csv.toString();
+    }
 }

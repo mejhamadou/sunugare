@@ -27,4 +27,23 @@ public class AuditService {
     public List<AuditLog> getAllLogs() {
         return auditLogRepository.findAll();
     }
+
+    public List<AuditLog> rechercher(String action, String email) {
+        return auditLogRepository.rechercherLogs(
+                (action != null && !action.isEmpty()) ? action : null,
+                (email != null && !email.isEmpty()) ? email : null
+        );
+    }
+
+    public String exporterCsv(List<AuditLog> logs) {
+        StringBuilder csv = new StringBuilder("Date;Utilisateur;Action;Entite;Details\n");
+        for (AuditLog log : logs) {
+            csv.append(log.getDateAction()).append(";")
+                    .append(log.getUtilisateurEmail()).append(";")
+                    .append(log.getAction()).append(";")
+                    .append(log.getEntite()).append(";")
+                    .append(log.getDetails() != null ? log.getDetails().replace("\n", " ") : "").append("\n");
+        }
+        return csv.toString();
+    }
 }

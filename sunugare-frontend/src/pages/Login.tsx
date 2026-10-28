@@ -28,7 +28,7 @@ export default function Login() {
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 10%' }}>
 
                 <div style={{ marginBottom: '40px' }}>
-                    <img src="/logo.png" alt="SUNUGARE" style={{ height: '60px' }} />
+                    <img src="/logo.png" alt="SUNUGARE" style={{ height: '150px' }} />
                 </div>
 
                 <h1 style={{ fontSize: '32px', marginBottom: '10px', color: 'var(--text-main)' }}>Connexion</h1>
@@ -61,7 +61,7 @@ export default function Login() {
             }}>
                 {/* Un grand carré blanc pour la visibilité du logo */}
                 <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: '20px', marginBottom: '40px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
-                    <img src="/logo.png" alt="SUNUGARE" style={{ width: '300px', objectFit: 'contain' }} />
+                    <img src="/logo.png" alt="SUNUGARE" style={{ width: '350px', objectFit: 'contain' }} />
                 </div>
 
                 <h2 style={{ color: 'white', fontSize: '28px', marginBottom: '10px' }}>Bienvenue sur SUNUGARE</h2>

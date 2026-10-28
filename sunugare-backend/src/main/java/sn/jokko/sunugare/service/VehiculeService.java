@@ -65,6 +65,21 @@ public class VehiculeService {
         return vehiculeRepository.save(v);
     }
 
+    public List<Vehicule> rechercher(Long compagnieId) {
+        return vehiculeRepository.rechercherVehicules(compagnieId);
+    }
+
+    public String exporterCsv(List<Vehicule> vehicules) {
+        StringBuilder csv = new StringBuilder("Immatriculation;Marque;Capacite;Compagnie\n");
+        for (Vehicule v : vehicules) {
+            csv.append(v.getImmatriculation()).append(";")
+                    .append(v.getMarque()).append(";")
+                    .append(v.getCapacite()).append(";")
+                    .append(v.getCompagnie().getNom()).append("\n");
+        }
+        return csv.toString();
+    }
+
     public Vehicule validerManuellement(Long id, String email) {
         Vehicule v = vehiculeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Véhicule introuvable"));
